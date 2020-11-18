@@ -6,7 +6,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     statementStack: [],
-    propositionStack: [],
+    premiseStack: [],
     argumentStack: [],
   },
   mutations: {
@@ -14,7 +14,7 @@ export default new Vuex.Store({
       state.statementStack.push(payload);
     },
     ADD_TO_PROPOSITION_STACK(state, payload) {
-      state.propositionStack.push(payload);
+      state.premiseStack.push(payload);
     },
     ADD_TO_ARGUMENT_STACK(state, payload) {
       state.argumentStack.push(payload);
@@ -24,8 +24,8 @@ export default new Vuex.Store({
     addToStatementStack(context, newStatement) {
       context.commit('ADD_TO_STATEMENT_STACK', newStatement);
     },
-    addToPropositionStack(context, newProposition) {
-      context.commit('ADD_TO_PROPOSITION_STACK', newProposition);
+    addToPremiseStack(context, newPremise) {
+      context.commit('ADD_TO_PROPOSITION_STACK', newPremise);
     },
     addToArgumentStack(context, newArgument) {
       context.commit('ADD_TO_ARGUMENT_STACK', newArgument);
@@ -35,8 +35,8 @@ export default new Vuex.Store({
     getStatementStack(state) {
       return state.statementStack;
     },
-    getPropositionStack(state) {
-      return state.propositionStack;
+    getPremiseStack(state) {
+      return state.premiseStack;
     },
     getArgumentStack(state) {
       return state.argumentStack;

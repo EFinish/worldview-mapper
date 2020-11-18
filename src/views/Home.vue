@@ -17,17 +17,17 @@
     </b-row>
     <b-row>
       <b-col>
-        <h4>Propositions</h4>
+        <h4>Premises</h4>
       </b-col>
     </b-row>
     <b-row>
       <b-col>
-        <CreateProposition />
+        <CreatePremise />
       </b-col>
     </b-row>
     <b-row>
       <b-col>
-        {{ propositionStack }}
+        {{ premiseStack }}
       </b-col>
     </b-row>
     <b-row>
@@ -51,21 +51,21 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import CreateStatement from '@/components/CreateStatement.vue';
-import CreateProposition from '@/components/CreateProposition.vue';
+import CreatePremise from '@/components/CreatePremise.vue';
 import CreateArgument from '@/components/CreateArgument.vue';
 import { State } from 'vuex-class';
 
 @Component({
   components: {
     CreateStatement,
-    CreateProposition,
+    CreatePremise,
     CreateArgument,
   },
 })
 export default class Home extends Vue {
   @State('statementStack') statementStack: any
 
-  @State('propositionStack') propositionStack: any
+  @State('premiseStack') premiseStack: any
 
   @State('argumentStack') argumentStack: any
 }
