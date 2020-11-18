@@ -35,6 +35,7 @@ export default class CreateStatement extends Vue {
 
   submit() {
     this.addToStatementStack(this.statementValue);
+    this.statementValue = '';
   }
 }
 </script>
