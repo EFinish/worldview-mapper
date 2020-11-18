@@ -27,10 +27,9 @@ exports.command = function command(data) {
     // The arguments for the function to be sent to the browser are specified in this array
     [data],
 
-    (result) => {
-      // The "result" object contains the result of what we have sent back from the browser window
-      console.log('custom execute result:', result.value);
-    },
+    // (result) => {
+    //   console.log('custom execute result:', result.value);
+    // },
   );
 
   return this;
