@@ -15,11 +15,22 @@
             </b-col>
         </b-row>
         <div v-if="premiseType !== null">
-        <b-row v-for="index in premiseType.numStatements" :key="index">
-            <b-col>
-                POTATO
-            </b-col>
-        </b-row>
+            <b-row v-for="index in premiseType.numStatements" :key="index">
+                <b-col>
+                    <b-form-group
+                        :description="`Select statement ${index} new premise`"
+                        label="Text"
+                        :label-for="`premiseTypeStatementSelect[${index-1}]`"
+                        >
+                        <b-form-select
+                        :id="`premiseTypeStatementSelect[${index-1}]`"
+                        v-model="premiseStatements[index-1]"
+                        :options="premiseStatementOptions"
+                        ></b-form-select>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            {{premisePreview}}
         </div>
         <b-row>
             <b-col>
@@ -31,7 +42,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { Action } from 'vuex-class';
+import { State, Action } from 'vuex-class';
 
 const PREMISE_IF_THEN = { label: 'IF p THEN q', numStatements: 2 };
 const PREMISE_IF_THEN_NOT = { label: 'IF p THEN NOT q', numStatements: 2 };
@@ -48,6 +59,8 @@ const PREMISE_FALSE = { label: 'p IS FALSE (assigns truth value)', numStatements
 export default class CreatePremise extends Vue {
     premiseType = null;
 
+    premiseStatements = [];
+
     options = [
       { value: null, text: 'Please select an option' },
       { value: PREMISE_IF_THEN, text: PREMISE_IF_THEN.label },
@@ -62,11 +75,25 @@ export default class CreatePremise extends Vue {
       { value: PREMISE_FALSE, text: PREMISE_FALSE.label },
     ];
 
+  @State('statementStack') statementStack: any
+
+  get premiseStatementOptions() {
+    return this.statementStack.map((statement: any) => ({ value: statement, text: statement }));
+  }
+
+  get premisePreview() {
+    if (!this.premiseType || this.premiseStatements.length !== this.premiseType.numStatements) {
+      return null;
+    }
+
+    return this.premiseType.label.replace('p', this.premiseStatements[0]).replace('q', this.premiseStatements[1]);
+  }
+
   @Action('addToPremiseStack')
   addToPremiseStack!: (addToPremiseStack: string) => void
 
   submit() {
-    this.addToPremiseStack('asd');
+    this.addToPremiseStack(this.premisePreview);
   }
 }
 </script>
