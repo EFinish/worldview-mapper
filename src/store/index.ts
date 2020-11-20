@@ -5,7 +5,10 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    statementStack: [],
+    statementStack: [
+      'I have chocolate',
+      'I will eat chocolate',
+    ],
     premiseStack: [],
     argumentStack: [],
   },
