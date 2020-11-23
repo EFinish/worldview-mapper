@@ -2,6 +2,35 @@
     <b-container>
         <b-row>
             <b-col>
+                <b-form-group
+                    :description="`Select premise to add to argument`"
+                    label="Text"
+                    :label-for="`premiseSelect`"
+                    >
+                    <b-form-select
+                    :id="`premiseSelect`"
+                    v-model="premiseSelect"
+                    :options="premiseOptions"
+                    ></b-form-select>
+                </b-form-group>
+            </b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <b-button variant="primary" v-on:click="addToArgumentPremises">Add Premises</b-button>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <b-list-group>
+              <b-list-group-item v-for="(premise, index) in argumentPremises" :key="premise">
+                {{ index + 1 }}.) {{ premise }}
+              </b-list-group-item>
+            </b-list-group>
+          </b-col>
+        </b-row>
+        <b-row>
+            <b-col>
                 <b-button variant="primary" v-on:click="submit">Create</b-button>
             </b-col>
         </b-row>
@@ -10,18 +39,32 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { Action } from 'vuex-class';
+import { Action, State } from 'vuex-class';
 
 @Component
 export default class CreateArgument extends Vue {
-//   statementValue = '';
+  premiseSelect = null;
+
+  argumentPremises = [];
+
+  @State('premiseStack') premiseStack: any
+
+  get premiseOptions() {
+    return this.premiseStack.map((premise: any) => ({ value: premise, text: premise }));
+  }
 
   @Action('addToArgumentStack')
-  addToArgumentStack!: (addToArgumentStack: string) => void
+  addToArgumentStack!: (addToArgumentStack: Array) => void
 
   submit() {
-    this.addToArgumentStack('asd');
-    // this.statementValue = '';
+    this.addToArgumentStack(this.argumentPremises);
+    this.argumentPremises = [];
+  }
+
+  addToArgumentPremises() {
+    if (this.premiseSelect !== null) {
+      this.argumentPremises.push(this.premiseSelect);
+    }
   }
 }
 </script>

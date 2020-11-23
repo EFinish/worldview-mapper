@@ -1,49 +1,42 @@
 <template>
-   <b-container class="home">
+   <b-container class="home" fluid>
      <b-row>
-      <b-col>
-        <h4>Statements</h4>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col>
-        <CreateStatement />
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col>
-        {{ statementStack }}
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col>
-        <h4>Premises</h4>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col>
-        <CreatePremise />
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col>
-        {{ premiseStack }}
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col>
-        <h4>Arguments</h4>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col>
-        <CreateArgument />
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col>
-        {{ argumentStack }}
-      </b-col>
+       <b-col md="1">
+         <b-row>
+          <b-col>
+            <strong>Statements</strong>
+            {{ statementStack }}
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <strong>Premises</strong>
+            {{ premiseStack }}
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <strong>Args</strong>
+            {{ argumentStack }}
+          </b-col>
+        </b-row>
+       </b-col>
+        <b-col>
+          <b-row>
+            <b-col>
+              <h4>Statements</h4>
+              <CreateStatement />
+            </b-col>
+            <b-col>
+              <h4>Premises</h4>
+              <CreatePremise />
+            </b-col>
+            <b-col>
+              <h4>Arguments</h4>
+              <CreateArgument />
+            </b-col>
+          </b-row>
+        </b-col>
     </b-row>
   </b-container>
 </template>
