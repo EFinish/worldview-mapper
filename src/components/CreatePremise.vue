@@ -34,7 +34,7 @@
         </div>
         <b-row>
             <b-col>
-                <b-button variant="primary" v-on:click="submit">Add To WIP Argument</b-button>
+                <b-button variant="success" v-on:click="submit">Create</b-button>
             </b-col>
         </b-row>
   </b-container>
@@ -94,6 +94,8 @@ export default class CreatePremise extends Vue {
 
   submit() {
     this.addToPremiseStack(this.premisePreview);
+    this.premiseStatements = [];
+    this.premiseType = null;
   }
 }
 </script>

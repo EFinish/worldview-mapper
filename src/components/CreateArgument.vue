@@ -17,11 +17,6 @@
         </b-row>
         <b-row>
           <b-col>
-            <b-button variant="primary" v-on:click="addToArgumentPremises">Add Premises</b-button>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col>
             <b-list-group>
               <b-list-group-item v-for="(premise, index) in argumentPremises" :key="premise">
                 {{ index + 1 }}.) {{ premise }}
@@ -31,7 +26,14 @@
         </b-row>
         <b-row>
             <b-col>
-                <b-button variant="primary" v-on:click="submit">Create</b-button>
+              <b-button-group>
+                <b-button
+                variant="primary"
+                v-on:click="addToArgumentPremises">
+                Add Premises
+                </b-button>
+                <b-button variant="success" v-on:click="submit">Create</b-button>
+              </b-button-group>
             </b-col>
         </b-row>
   </b-container>

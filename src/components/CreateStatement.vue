@@ -16,7 +16,7 @@
         </b-row>
         <b-row>
             <b-col>
-                <b-button variant="primary" v-on:click="submit">Create</b-button>
+                <b-button variant="success" v-on:click="submit">Create</b-button>
             </b-col>
         </b-row>
   </b-container>
