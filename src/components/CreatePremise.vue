@@ -4,7 +4,7 @@
             <b-col>
                 <b-form-group
                     description="Select a premise type"
-                    label="Text"
+                    label="Premise Type"
                     label-for="premiseTypeSelect"
                     >
                     <b-form-select
@@ -19,7 +19,7 @@
                 <b-col>
                     <b-form-group
                         :description="`Select statement ${index} new premise`"
-                        label="Text"
+                        :label="`statement ${index}`"
                         :label-for="`premiseTypeStatementSelect[${index-1}]`"
                         >
                         <b-form-select

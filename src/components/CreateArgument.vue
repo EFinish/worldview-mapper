@@ -4,7 +4,7 @@
             <b-col>
                 <b-form-group
                     :description="`Select premise to add to argument`"
-                    label="Text"
+                    label="Argument Premise"
                     :label-for="`premiseSelect`"
                     >
                     <b-form-select

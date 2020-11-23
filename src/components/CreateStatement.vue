@@ -4,7 +4,7 @@
             <b-col>
                 <b-form-group
                     description="Enter the statement text"
-                    label="Text"
+                    label="Statement Text"
                     label-for="statementValue"
                     >
                     <b-form-input
