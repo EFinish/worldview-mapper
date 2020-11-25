@@ -18,8 +18,8 @@
         <b-row>
           <b-col>
             <b-list-group>
-              <b-list-group-item v-for="(premise, index) in argumentPremises" :key="premise">
-                {{ index + 1 }}.) {{ premise }}
+              <b-list-group-item v-for="(premise, index) in newArgument.premises" :key="premise">
+                {{ index + 1 }}.) {{ getFilledLabel(premise) }}
               </b-list-group-item>
             </b-list-group>
           </b-col>
@@ -43,29 +43,36 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { Action, State } from 'vuex-class';
 
+import { Premise, Argument } from '@/models';
+import getFilledLabel from '@/utils/premise';
+
 @Component
 export default class CreateArgument extends Vue {
-  premiseSelect = null;
+  newArgument: Argument = { premises: [] };
 
-  argumentPremises = [];
+  premiseSelect: Premise = { type: { label: '', numStatements: 0 }, statements: [] };
 
   @State('premiseStack') premiseStack: any
 
   get premiseOptions() {
-    return this.premiseStack.map((premise: any) => ({ value: premise, text: premise }));
+    return this.premiseStack.map(
+      (premise: Premise) => ({ value: premise, text: getFilledLabel(premise) }),
+    );
   }
 
   @Action('addToArgumentStack')
-  addToArgumentStack!: (addToArgumentStack: Array) => void
+  addToArgumentStack!: (addToArgumentStack: Argument) => void
 
-  submit() {
-    this.addToArgumentStack(this.argumentPremises);
-    this.argumentPremises = [];
+  getFilledLabel = getFilledLabel;
+
+  submit(): void {
+    this.addToArgumentStack(this.newArgument);
+    this.newArgument = { premises: [] };
   }
 
-  addToArgumentPremises() {
+  addToArgumentPremises(): void {
     if (this.premiseSelect !== null) {
-      this.argumentPremises.push(this.premiseSelect);
+      this.newArgument.premises.push(this.premiseSelect);
     }
   }
 }
