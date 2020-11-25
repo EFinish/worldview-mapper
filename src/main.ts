@@ -13,5 +13,8 @@ Vue.config.productionTip = false;
 new Vue({
   router,
   store,
+  created: () => {
+    store.dispatch('initStoreForTesting');
+  },
   render: (h) => h(App),
 }).$mount('#app');

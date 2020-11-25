@@ -9,7 +9,7 @@
                     >
                     <b-form-input
                     id="statementValue"
-                    v-model="statementValue"
+                    v-model="statementValue.text"
                     trim></b-form-input>
                 </b-form-group>
             </b-col>
@@ -25,17 +25,18 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { Action } from 'vuex-class';
+import { Statement } from '@/models/Statement';
 
 @Component
 export default class CreateStatement extends Vue {
-  statementValue = '';
+  statementValue: Statement = { text: '' };
 
   @Action('addToStatementStack')
-  addToStatementStack!: (addToStatementStack: string) => void
+  addToStatementStack!: (addToStatementStack: Statement) => void
 
   submit() {
     this.addToStatementStack(this.statementValue);
-    this.statementValue = '';
+    this.statementValue = { text: '' };
   }
 }
 </script>
