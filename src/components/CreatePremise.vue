@@ -45,6 +45,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import { State, Action } from 'vuex-class';
 
 import { Premise, PremiseType, Statement } from '@/models';
+import getFilledLabel from '@/utils/premise';
 
 const availablePremiseTypes = {
   PREMISE_IF_THEN: { label: 'IF p THEN q', numStatements: 2 } as PremiseType,
@@ -122,21 +123,7 @@ export default class CreatePremise extends Vue {
   }
 
   get premisePreview() {
-    if (this.newPremise.type.label === null) {
-      return null;
-    }
-
-    let returnString = this.newPremise.type.label;
-
-    if (this.newPremise.statements[0]) {
-      returnString = returnString.replace('p', this.newPremise.statements[0].text);
-    }
-
-    if (this.newPremise.statements[1]) {
-      returnString = returnString.replace('q', this.newPremise.statements[1].text);
-    }
-
-    return returnString;
+    return getFilledLabel(this.newPremise);
   }
 
   @Action('addToPremiseStack')
