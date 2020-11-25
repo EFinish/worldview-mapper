@@ -25,7 +25,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { Action } from 'vuex-class';
-import { Statement } from '@/models/Statement';
+import { Statement } from '@/models';
 
 @Component
 export default class CreateStatement extends Vue {

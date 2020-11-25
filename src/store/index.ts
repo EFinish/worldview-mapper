@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-import { Statement } from '@/models/Statement';
+import { Statement } from '@/models';
 
 Vue.use(Vuex);
 
