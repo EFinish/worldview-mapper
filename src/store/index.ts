@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-import { Statement } from '@/models';
+import { Statement, Premise, Argument } from '@/models';
 
 Vue.use(Vuex);
 
@@ -15,7 +15,7 @@ export default new Vuex.Store({
     ADD_TO_STATEMENT_STACK(state, payload: Statement) {
       state.statementStack.push(payload);
     },
-    ADD_TO_PROPOSITION_STACK(state, payload) {
+    ADD_TO_PREMISE_STACK(state, payload: Premise) {
       state.premiseStack.push(payload);
     },
     ADD_TO_ARGUMENT_STACK(state, payload) {
@@ -26,8 +26,8 @@ export default new Vuex.Store({
     addToStatementStack(context, newStatement: Statement) {
       context.commit('ADD_TO_STATEMENT_STACK', newStatement);
     },
-    addToPremiseStack(context, newPremise) {
-      context.commit('ADD_TO_PROPOSITION_STACK', newPremise);
+    addToPremiseStack(context, newPremise: Premise) {
+      context.commit('ADD_TO_PREMISE_STACK', newPremise);
     },
     addToArgumentStack(context, newArgument) {
       context.commit('ADD_TO_ARGUMENT_STACK', newArgument);

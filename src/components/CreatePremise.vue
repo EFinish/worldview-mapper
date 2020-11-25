@@ -9,13 +9,13 @@
                     >
                     <b-form-select
                     id="premiseTypeSelect"
-                    v-model="premiseType"
+                    v-model="newPremise.type"
                     :options="options"></b-form-select>
                 </b-form-group>
             </b-col>
         </b-row>
-        <div v-if="premiseType !== null">
-            <b-row v-for="index in premiseType.numStatements" :key="index">
+        <div v-if="newPremise.type.label !== null">
+            <b-row v-for="index in newPremise.type.numStatements" :key="index">
                 <b-col>
                     <b-form-group
                         :description="`Select statement ${index} new premise`"
@@ -24,7 +24,7 @@
                         >
                         <b-form-select
                         :id="`premiseTypeStatementSelect[${index-1}]`"
-                        v-model="premiseStatements[index-1]"
+                        v-model="newPremise.statements[index-1]"
                         :options="premiseStatementOptions"
                         ></b-form-select>
                     </b-form-group>
@@ -44,58 +44,113 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { State, Action } from 'vuex-class';
 
-const PREMISE_IF_THEN = { label: 'IF p THEN q', numStatements: 2 };
-const PREMISE_IF_THEN_NOT = { label: 'IF p THEN NOT q', numStatements: 2 };
-const PREMISE_OR = { label: 'p OR q (OR)', numStatements: 2 };
-const PREMISE_NOR = { label: 'p NOR q (NOR)', numStatements: 2 };
-const PREMISE_XOR = { label: 'EITHER p OR q (XOR)', numStatements: 2 };
-const PREMISE_XNOR = { label: 'EITHER (p AND q) OR (!p AND !q) (XNOR)', numStatements: 2 };
-const PREMISE_AND = { label: 'p AND q (AND)', numStatements: 2 };
-const PREMISE_NAND = { label: 'NOT p AND q (NAND)', numStatements: 2 };
-const PREMISE_TRUE = { label: 'p IS TRUE (assigns truth value)', numStatements: 1 };
-const PREMISE_FALSE = { label: 'p IS FALSE (assigns truth value)', numStatements: 1 };
+import { Premise, PremiseType, Statement } from '@/models';
+
+const availablePremiseTypes = {
+  PREMISE_IF_THEN: { label: 'IF p THEN q', numStatements: 2 } as PremiseType,
+  PREMISE_IF_THEN_NOT: { label: 'IF p THEN NOT q', numStatements: 2 } as PremiseType,
+  PREMISE_OR: { label: 'p OR q (OR)', numStatements: 2 } as PremiseType,
+  PREMISE_NOR: { label: 'p NOR q (NOR)', numStatements: 2 } as PremiseType,
+  PREMISE_XOR: { label: 'EITHER p OR q (XOR)', numStatements: 2 } as PremiseType,
+  PREMISE_XNOR: { label: 'EITHER (p AND q) OR (!p AND !q) (XNOR)', numStatements: 2 } as PremiseType,
+  PREMISE_AND: { label: 'p AND q (AND)', numStatements: 2 } as PremiseType,
+  PREMISE_NAND: { label: 'NOT p AND q (NAND)', numStatements: 2 } as PremiseType,
+  PREMISE_TRUE: { label: 'p IS TRUE (assigns truth value)', numStatements: 1 } as PremiseType,
+  PREMISE_FALSE: { label: 'p IS FALSE (assigns truth value)', numStatements: 1 } as PremiseType,
+};
 
 @Component
 export default class CreatePremise extends Vue {
-    premiseType = null;
-
-    premiseStatements = [];
+    newPremise: Premise = {
+      type: {
+        label: null,
+        numStatements: null,
+      },
+      statements: [],
+    }
 
     options = [
       { value: null, text: 'Please select an option' },
-      { value: PREMISE_IF_THEN, text: PREMISE_IF_THEN.label },
-      { value: PREMISE_IF_THEN_NOT, text: PREMISE_IF_THEN_NOT.label },
-      { value: PREMISE_OR, text: PREMISE_OR.label },
-      { value: PREMISE_NOR, text: PREMISE_NOR.label },
-      { value: PREMISE_XOR, text: PREMISE_XOR.label },
-      { value: PREMISE_XNOR, text: PREMISE_XNOR.label },
-      { value: PREMISE_AND, text: PREMISE_AND.label },
-      { value: PREMISE_NAND, text: PREMISE_NAND.label },
-      { value: PREMISE_TRUE, text: PREMISE_TRUE.label },
-      { value: PREMISE_FALSE, text: PREMISE_FALSE.label },
+      {
+        value: availablePremiseTypes.PREMISE_IF_THEN,
+        text: availablePremiseTypes.PREMISE_IF_THEN.label,
+      },
+      {
+        value: availablePremiseTypes.PREMISE_IF_THEN_NOT,
+        text: availablePremiseTypes.PREMISE_IF_THEN_NOT.label,
+      },
+      {
+        value: availablePremiseTypes.PREMISE_OR,
+        text: availablePremiseTypes.PREMISE_OR.label,
+      },
+      {
+        value: availablePremiseTypes.PREMISE_NOR,
+        text: availablePremiseTypes.PREMISE_NOR.label,
+      },
+      {
+        value: availablePremiseTypes.PREMISE_XOR,
+        text: availablePremiseTypes.PREMISE_XOR.label,
+      },
+      {
+        value: availablePremiseTypes.PREMISE_XNOR,
+        text: availablePremiseTypes.PREMISE_XNOR.label,
+      },
+      {
+        value: availablePremiseTypes.PREMISE_AND,
+        text: availablePremiseTypes.PREMISE_AND.label,
+      },
+      {
+        value: availablePremiseTypes.PREMISE_NAND,
+        text: availablePremiseTypes.PREMISE_NAND.label,
+      },
+      {
+        value: availablePremiseTypes.PREMISE_TRUE,
+        text: availablePremiseTypes.PREMISE_TRUE.label,
+      },
+      {
+        value: availablePremiseTypes.PREMISE_FALSE,
+        text: availablePremiseTypes.PREMISE_FALSE.label,
+      },
     ];
 
   @State('statementStack') statementStack: any
 
   get premiseStatementOptions() {
-    return this.statementStack.map((statement: any) => ({ value: statement, text: statement }));
+    return this.statementStack.map(
+      (statement: Statement) => ({ value: statement, text: statement.text }),
+    );
   }
 
   get premisePreview() {
-    if (!this.premiseType || this.premiseStatements.length !== this.premiseType.numStatements) {
+    if (this.newPremise.type.label === null) {
       return null;
     }
 
-    return this.premiseType.label.replace('p', this.premiseStatements[0]).replace('q', this.premiseStatements[1]);
+    let returnString = this.newPremise.type.label;
+
+    if (this.newPremise.statements[0]) {
+      returnString = returnString.replace('p', this.newPremise.statements[0].text);
+    }
+
+    if (this.newPremise.statements[1]) {
+      returnString = returnString.replace('q', this.newPremise.statements[1].text);
+    }
+
+    return returnString;
   }
 
   @Action('addToPremiseStack')
-  addToPremiseStack!: (addToPremiseStack: string) => void
+  addToPremiseStack!: (addToPremiseStack: Premise) => void
 
   submit() {
-    this.addToPremiseStack(this.premisePreview);
-    this.premiseStatements = [];
-    this.premiseType = null;
+    this.addToPremiseStack(this.newPremise);
+    this.newPremise = {
+      type: {
+        label: null,
+        numStatements: null,
+      },
+      statements: [],
+    };
   }
 }
 </script>
