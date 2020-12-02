@@ -1,7 +1,9 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-import { Statement, Premise, Argument } from '@/models';
+import {
+  Statement, Premise, Argument, PremiseType,
+} from '@/models';
 
 Vue.use(Vuex);
 
@@ -13,13 +15,24 @@ export default new Vuex.Store({
   },
   mutations: {
     ADD_TO_STATEMENT_STACK(state, payload: Statement) {
-      state.statementStack.push(payload);
+      state.statementStack.push(
+        {
+          id: state.statementStack.length,
+          ...payload,
+        } as Statement,
+      );
     },
     ADD_TO_PREMISE_STACK(state, payload: Premise) {
-      state.premiseStack.push(payload);
+      state.premiseStack.push({
+        id: state.premiseStack.length,
+        ...payload,
+      } as Premise);
     },
     ADD_TO_ARGUMENT_STACK(state, payload: Argument) {
-      state.argumentStack.push(payload);
+      state.argumentStack.push({
+        id: state.argumentStack.length,
+        ...payload,
+      });
     },
   },
   actions: {
@@ -37,10 +50,35 @@ export default new Vuex.Store({
       context.commit('ADD_TO_STATEMENT_STACK', { text: 'I will eat chocolate' } as Statement);
       context.commit('ADD_TO_PREMISE_STACK',
         {
-          type: { label: 'IF p THEN q', numStatements: 2 },
+          type: { label: 'IF p THEN q', numStatements: 2 } as PremiseType,
           statements: [
-            { text: 'I have chocolate' },
-            { text: 'I will eat chocolate' },
+            { text: 'I have chocolate' } as Statement,
+            { text: 'I will eat chocolate' } as Statement,
+          ],
+        } as Premise);
+      context.commit('ADD_TO_PREMISE_STACK',
+        {
+          type: { label: 'p IS TRUE (assigns truth value)', numStatements: 1 } as PremiseType,
+          statements: [
+            { text: 'I have chocolate' } as Statement,
+          ],
+        } as Premise);
+      context.commit('ADD_TO_ARGUMENT_STACK',
+        {
+          premises: [
+            {
+              id: 0,
+              type: { label: 'IF p THEN q', numStatements: 2 } as PremiseType,
+              statements: [
+                { text: 'I have chocolate' } as Statement,
+                { text: 'I will eat chocolate' } as Statement,
+              ],
+            } as Premise,
+            {
+              id: 1,
+              type: { label: 'p IS TRUE (assigns truth value)', numStatements: 1 } as PremiseType,
+              statements: [{ text: 'I have chocolate' } as Statement],
+            } as Premise,
           ],
         });
     },
