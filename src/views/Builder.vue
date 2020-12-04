@@ -77,7 +77,7 @@ import { State } from 'vuex-class';
     CreateArgument,
   },
 })
-export default class Home extends Vue {
+export default class Builder extends Vue {
   showStatementStack = false;
 
   showPremiseStack = false;
