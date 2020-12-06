@@ -65,7 +65,7 @@ export default class CreatePremise extends Vue {
   mounted() {
     this.options.push({ value: null, text: 'Please select an option' });
 
-    constants.PremiseTypes.forEach((pt) => {
+    constants.PremiseTypesArray.forEach((pt) => {
       this.options.push({
         value: pt,
         text: pt.label,

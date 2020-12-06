@@ -51,7 +51,7 @@ export default new Vuex.Store({
       context.commit('ADD_TO_STATEMENT_STACK', { text: 'I will eat chocolate' } as Statement);
       context.commit('ADD_TO_PREMISE_STACK',
         {
-          type: constants.PremiseTypes[2],
+          type: constants.PremiseTypes.premiseTypeIfThen,
           statements: [
             context.getters.getStatementFromStackById(0),
             context.getters.getStatementFromStackById(1),
@@ -59,14 +59,14 @@ export default new Vuex.Store({
         } as Premise);
       context.commit('ADD_TO_PREMISE_STACK',
         {
-          type: constants.PremiseTypes[0],
+          type: constants.PremiseTypes.premiseTypeTrue,
           statements: [
             context.getters.getStatementFromStackById(0),
           ],
         } as Premise);
       context.commit('ADD_TO_PREMISE_STACK',
         {
-          type: constants.PremiseTypes[0],
+          type: constants.PremiseTypes.premiseTypeTrue,
           statements: [
             context.getters.getStatementFromStackById(1),
           ],
