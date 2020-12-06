@@ -46,75 +46,32 @@ import { State, Action } from 'vuex-class';
 
 import { Premise, PremiseType, Statement } from '@/models';
 import getFilledLabel from '@/utils/premise';
-
-const availablePremiseTypes = {
-  PREMISE_IF_THEN: { label: 'IF p THEN q', numStatements: 2 } as PremiseType,
-  PREMISE_IF_THEN_NOT: { label: 'IF p THEN NOT q', numStatements: 2 } as PremiseType,
-  PREMISE_OR: { label: 'p OR q (OR)', numStatements: 2 } as PremiseType,
-  PREMISE_NOR: { label: 'p NOR q (NOR)', numStatements: 2 } as PremiseType,
-  PREMISE_XOR: { label: 'EITHER p OR q (XOR)', numStatements: 2 } as PremiseType,
-  PREMISE_XNOR: { label: 'EITHER (p AND q) OR (!p AND !q) (XNOR)', numStatements: 2 } as PremiseType,
-  PREMISE_AND: { label: 'p AND q (AND)', numStatements: 2 } as PremiseType,
-  PREMISE_NAND: { label: 'NOT p AND q (NAND)', numStatements: 2 } as PremiseType,
-  PREMISE_TRUE: { label: 'p IS TRUE (assigns truth value)', numStatements: 1 } as PremiseType,
-  PREMISE_FALSE: { label: 'p IS FALSE (assigns truth value)', numStatements: 1 } as PremiseType,
-};
+import constants from '@/utils/constants';
 
 @Component
 export default class CreatePremise extends Vue {
-    newPremise: Premise = {
-      type: {
-        label: null,
-        numStatements: null,
-      },
-      statements: [],
-    }
+  newPremise: Premise = {
+    type: {
+      label: null,
+      numStatements: null,
+    },
+    statements: [],
+  }
 
-    options = [
-      { value: null, text: 'Please select an option' },
-      {
-        value: availablePremiseTypes.PREMISE_IF_THEN,
-        text: availablePremiseTypes.PREMISE_IF_THEN.label,
-      },
-      {
-        value: availablePremiseTypes.PREMISE_IF_THEN_NOT,
-        text: availablePremiseTypes.PREMISE_IF_THEN_NOT.label,
-      },
-      {
-        value: availablePremiseTypes.PREMISE_OR,
-        text: availablePremiseTypes.PREMISE_OR.label,
-      },
-      {
-        value: availablePremiseTypes.PREMISE_NOR,
-        text: availablePremiseTypes.PREMISE_NOR.label,
-      },
-      {
-        value: availablePremiseTypes.PREMISE_XOR,
-        text: availablePremiseTypes.PREMISE_XOR.label,
-      },
-      {
-        value: availablePremiseTypes.PREMISE_XNOR,
-        text: availablePremiseTypes.PREMISE_XNOR.label,
-      },
-      {
-        value: availablePremiseTypes.PREMISE_AND,
-        text: availablePremiseTypes.PREMISE_AND.label,
-      },
-      {
-        value: availablePremiseTypes.PREMISE_NAND,
-        text: availablePremiseTypes.PREMISE_NAND.label,
-      },
-      {
-        value: availablePremiseTypes.PREMISE_TRUE,
-        text: availablePremiseTypes.PREMISE_TRUE.label,
-      },
-      {
-        value: availablePremiseTypes.PREMISE_FALSE,
-        text: availablePremiseTypes.PREMISE_FALSE.label,
-      },
-    ];
+  options = [];
 
   @State('statementStack') statementStack: any
+
+  mounted() {
+    this.options.push({ value: null, text: 'Please select an option' });
+
+    constants.PremiseTypes.forEach((pt) => {
+      this.options.push({
+        value: pt,
+        text: pt.label,
+      });
+    });
+  }
 
   get premiseStatementOptions() {
     return this.statementStack.map(

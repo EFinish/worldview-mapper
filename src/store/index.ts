@@ -4,6 +4,7 @@ import Vuex from 'vuex';
 import {
   Statement, Premise, Argument, PremiseType,
 } from '@/models';
+import constants from '@/utils/constants';
 
 Vue.use(Vuex);
 
@@ -50,36 +51,33 @@ export default new Vuex.Store({
       context.commit('ADD_TO_STATEMENT_STACK', { text: 'I will eat chocolate' } as Statement);
       context.commit('ADD_TO_PREMISE_STACK',
         {
-          type: { label: 'IF p THEN q', numStatements: 2 } as PremiseType,
+          type: constants.PremiseTypes[2],
           statements: [
-            { text: 'I have chocolate' } as Statement,
-            { text: 'I will eat chocolate' } as Statement,
+            context.getters.getStatementFromStackById(0),
+            context.getters.getStatementFromStackById(1),
           ],
         } as Premise);
       context.commit('ADD_TO_PREMISE_STACK',
         {
-          type: { label: 'p IS TRUE (assigns truth value)', numStatements: 1 } as PremiseType,
+          type: constants.PremiseTypes[0],
           statements: [
-            { text: 'I have chocolate' } as Statement,
+            context.getters.getStatementFromStackById(0),
+          ],
+        } as Premise);
+      context.commit('ADD_TO_PREMISE_STACK',
+        {
+          type: constants.PremiseTypes[0],
+          statements: [
+            context.getters.getStatementFromStackById(1),
           ],
         } as Premise);
       context.commit('ADD_TO_ARGUMENT_STACK',
         {
           premises: [
-            {
-              id: 0,
-              type: { label: 'IF p THEN q', numStatements: 2 } as PremiseType,
-              statements: [
-                { text: 'I have chocolate' } as Statement,
-                { text: 'I will eat chocolate' } as Statement,
-              ],
-            } as Premise,
-            {
-              id: 1,
-              type: { label: 'p IS TRUE (assigns truth value)', numStatements: 1 } as PremiseType,
-              statements: [{ text: 'I have chocolate' } as Statement],
-            } as Premise,
+            context.getters.getPremiseFromStackById(0),
+            context.getters.getPremiseFromStackById(1),
           ],
+          conclusion: context.getters.getPremiseFromStackById(2),
         });
     },
   },
@@ -93,5 +91,9 @@ export default new Vuex.Store({
     getArgumentStack(state) {
       return state.argumentStack;
     },
+    // eslint-disable-next-line max-len
+    getStatementFromStackById: (state) => (statementId: number) => state.statementStack.find((statement) => statement.id === statementId),
+    // eslint-disable-next-line max-len
+    getPremiseFromStackById: (state) => (premiseId: number) => state.premiseStack.find((premise) => premise.id === premiseId),
   },
 });

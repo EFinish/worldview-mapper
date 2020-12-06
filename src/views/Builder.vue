@@ -10,7 +10,7 @@
               Show Statements
             </b-button>
             <b-list-group v-if="showStatementStack">
-              <b-list-group-item v-for="statement in statementStack" :key="statement">
+              <b-list-group-item v-for="statement in statementStack" :key="statement.id">
                 {{ statement }}
               </b-list-group-item>
             </b-list-group>
@@ -22,7 +22,7 @@
               Show Premises
             </b-button>
             <b-list-group v-if="showPremiseStack">
-              <b-list-group-item v-for="premise in premiseStack" :key="premise">
+              <b-list-group-item v-for="premise in premiseStack" :key="premise.id">
                 {{ premise }}
               </b-list-group-item>
             </b-list-group>
@@ -34,7 +34,7 @@
               Show Arguments
             </b-button>
             <b-list-group v-if="showArgumentStack">
-              <b-list-group-item v-for="argument in argumentStack" :key="argument">
+              <b-list-group-item v-for="argument in argumentStack" :key="argument.id">
                 {{ argument }}
               </b-list-group-item>
             </b-list-group>

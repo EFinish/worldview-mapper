@@ -18,8 +18,11 @@
         <b-row>
           <b-col>
             <b-list-group>
-              <b-list-group-item v-for="(premise, index) in newArgument.premises" :key="premise">
+              <b-list-group-item v-for="(premise, index) in newArgument.premises" :key="index">
                 {{ index + 1 }}.) {{ getFilledLabel(premise) }}
+              </b-list-group-item>
+              <b-list-group-item v-if="Object.keys(newArgument.conclusion).length > 0">
+                C: {{ getFilledLabel(newArgument.conclusion) }}
               </b-list-group-item>
             </b-list-group>
           </b-col>
@@ -31,6 +34,11 @@
                 variant="primary"
                 v-on:click="addToArgumentPremises">
                 Add Premises
+                </b-button>
+                <b-button
+                variant="primary"
+                v-on:click="setConclusion">
+                Set Conclusion
                 </b-button>
                 <b-button variant="success" v-on:click="submit">Create</b-button>
               </b-button-group>
@@ -48,7 +56,7 @@ import getFilledLabel from '@/utils/premise';
 
 @Component
 export default class CreateArgument extends Vue {
-  newArgument: Argument = { premises: [] };
+  newArgument: Argument = { premises: [], conclusion: {} as Premise };
 
   premiseSelect: Premise = { type: { label: '', numStatements: 0 }, statements: [] };
 
@@ -67,12 +75,18 @@ export default class CreateArgument extends Vue {
 
   submit(): void {
     this.addToArgumentStack(this.newArgument);
-    this.newArgument = { premises: [] };
+    this.newArgument = { premises: [], conclusion: {} as Premise };
   }
 
   addToArgumentPremises(): void {
     if (this.premiseSelect !== null) {
       this.newArgument.premises.push(this.premiseSelect);
+    }
+  }
+
+  setConclusion(): void {
+    if (this.premiseSelect !== null) {
+      this.newArgument.conclusion = this.premiseSelect;
     }
   }
 }

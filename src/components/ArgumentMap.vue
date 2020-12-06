@@ -16,12 +16,6 @@
                 </b-list-group>
             </b-col>
         </b-row>
-        <b-row>
-            <b-col>Conclusions:</b-col>
-            <b-col>
-                {{ argumentConclusions }}
-            </b-col>
-        </b-row>
   </b-container>
 </template>
 
@@ -33,14 +27,8 @@ import getFilledLabel from '@/utils/premise';
 
 @Component
 export default class ArgumentMap extends Vue {
-    conclusion = 'potato';
-
     @Prop() private argument!: Argument;
 
     getFilledLabel = getFilledLabel;
-
-    get argumentConclusions() {
-      return this.conclusion;
-    }
 }
 </script>
