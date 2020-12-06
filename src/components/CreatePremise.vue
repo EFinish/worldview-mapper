@@ -45,7 +45,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import { State, Action } from 'vuex-class';
 
 import { Premise, PremiseType, Statement } from '@/models';
-import getFilledLabel from '@/utils/premise';
+import PremiseUtil from '@/utils/premise';
 import constants from '@/utils/constants';
 
 @Component
@@ -80,7 +80,7 @@ export default class CreatePremise extends Vue {
   }
 
   get premisePreview() {
-    return getFilledLabel(this.newPremise);
+    return PremiseUtil.getFilledLabel(this.newPremise);
   }
 
   @Action('addToPremiseStack')

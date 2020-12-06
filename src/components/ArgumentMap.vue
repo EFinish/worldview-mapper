@@ -10,11 +10,17 @@
                 <b-list-group>
                     <b-list-group-item
                         v-for="(premise, index) in argument.premises"
-                        :key="premise">
+                        :key="index">
                         {{ index + 1 }}.) {{ getFilledLabel(premise) }}
+                    </b-list-group-item>
+                    <b-list-group-item>
+                        C: {{ getFilledLabel(argument.conclusion) }}
                     </b-list-group-item>
                 </b-list-group>
             </b-col>
+        </b-row>
+        <b-row>
+            <b-col>Valid: {{ isArgumentValid }}</b-col>
         </b-row>
   </b-container>
 </template>
@@ -23,12 +29,15 @@
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import { Argument } from '@/models';
 
-import getFilledLabel from '@/utils/premise';
+import PremiseUtil from '@/utils/premise';
+import ArgumentCalculator from '@/utils/argument-calculator';
 
 @Component
 export default class ArgumentMap extends Vue {
     @Prop() private argument!: Argument;
 
-    getFilledLabel = getFilledLabel;
+    getFilledLabel = PremiseUtil.getFilledLabel;
+
+    isArgumentValid = ArgumentCalculator.isArgumentValid(this.argument);
 }
 </script>

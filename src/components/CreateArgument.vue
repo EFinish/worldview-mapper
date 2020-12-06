@@ -52,7 +52,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import { Action, State } from 'vuex-class';
 
 import { Premise, Argument } from '@/models';
-import getFilledLabel from '@/utils/premise';
+import PremiseUtil from '@/utils/premise';
 
 @Component
 export default class CreateArgument extends Vue {
@@ -64,14 +64,14 @@ export default class CreateArgument extends Vue {
 
   get premiseOptions() {
     return this.premiseStack.map(
-      (premise: Premise) => ({ value: premise, text: getFilledLabel(premise) }),
+      (premise: Premise) => ({ value: premise, text: this.getFilledLabel(premise) }),
     );
   }
 
   @Action('addToArgumentStack')
   addToArgumentStack!: (addToArgumentStack: Argument) => void
 
-  getFilledLabel = getFilledLabel;
+  getFilledLabel = PremiseUtil.getFilledLabel;
 
   submit(): void {
     this.addToArgumentStack(this.newArgument);

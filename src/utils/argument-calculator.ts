@@ -6,8 +6,13 @@ const ArgumentCalculator = (function () {
     return true;
   }
 
+  function getInvalidPremises(argument: Argument) {
+    return [];
+  }
+
   return {
     isArgumentValid,
+    getInvalidPremises,
   };
 }());
 
