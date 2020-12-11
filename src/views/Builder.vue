@@ -10,8 +10,8 @@
               Show Statements
             </b-button>
             <b-list-group v-if="showStatementStack">
-              <b-list-group-item v-for="statement in statementStack" :key="statement.id">
-                {{ statement }}
+              <b-list-group-item v-for="(statement) in statementStack" :key="statement.id">
+                {{ statement.id }}.) {{ statement.text }}
               </b-list-group-item>
             </b-list-group>
           </b-col>
@@ -22,8 +22,8 @@
               Show Premises
             </b-button>
             <b-list-group v-if="showPremiseStack">
-              <b-list-group-item v-for="premise in premiseStack" :key="premise.id">
-                {{ premise }}
+              <b-list-group-item v-for="(premise) in premiseStack" :key="premise.id">
+                {{ premise.id }}.) {{ getFilledLabel(premise) }}
               </b-list-group-item>
             </b-list-group>
           </b-col>
@@ -35,7 +35,7 @@
             </b-button>
             <b-list-group v-if="showArgumentStack">
               <b-list-group-item v-for="argument in argumentStack" :key="argument.id">
-                {{ argument }}
+                <ListArgument :argument="argument"/>
               </b-list-group-item>
             </b-list-group>
           </b-col>
@@ -68,13 +68,17 @@ import { Component, Vue } from 'vue-property-decorator';
 import CreateStatement from '@/components/CreateStatement.vue';
 import CreatePremise from '@/components/CreatePremise.vue';
 import CreateArgument from '@/components/CreateArgument.vue';
+import ListArgument from '@/components/ListArgument.vue';
 import { State } from 'vuex-class';
+
+import PremiseUtil from '@/utils/premise';
 
 @Component({
   components: {
     CreateStatement,
     CreatePremise,
     CreateArgument,
+    ListArgument,
   },
 })
 export default class Builder extends Vue {
@@ -89,6 +93,8 @@ export default class Builder extends Vue {
   @State('premiseStack') premiseStack: any
 
   @State('argumentStack') argumentStack: any
+
+  getFilledLabel = PremiseUtil.getFilledLabel;
 
   switchShowStatementStack() {
     this.showStatementStack = !this.showStatementStack;
