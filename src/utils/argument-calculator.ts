@@ -1,74 +1,118 @@
-import { Argument } from '@/models';
+import { Argument, Statement, Premise } from '@/models';
+import { InvalidPremiseError } from '@/utils/errors/InvalidPremiseError';
 
 import constants from '@/utils/constants';
 
-const ArgumentCalculator = (function () {
-  function isArgumentValid(argument: Argument): boolean {
-    if (this.getInvalidPremises(argument).length > 0) {
+const premiseTypes = constants.PremiseTypes;
+
+export default class ArgumentCalculator {
+  private argument: Argument;
+
+  private trueStatements: Statement[] = [];
+
+  private falseStatements: Statement[] = [];
+
+  private premisesToProcess: Premise[] = [];
+
+  private invalidPremises: InvalidPremiseError[] = [];
+
+  constructor(argument: Argument) {
+    this.argument = argument;
+  }
+
+  isArgumentValid(): boolean {
+    const invalidPremises = this.findInvalidPremises();
+
+    if (invalidPremises.length > 0) {
       return false;
     }
 
     return true;
   }
 
-  function getInvalidPremises(argument: Argument) {
-    console.log('calculating invalid premises');
-    // if all premises are assumed true, will the conclusion follow?
-    const trueStatements = [];
-    const falseStatements = [];
+  findInvalidPremises(): InvalidPremiseError[] {
+    this.processTruthValueSettingStatements();
 
-    // set true and false assumptions according to truth-value setting premises
-    argument.premises.forEach((premise) => {
-      switch (premise.type.id) {
-        case constants.PremiseTypes.premiseTypeTrue.id:
-          // set to true
-          trueStatements.push(premise.statements[0]);
-          break;
-        case constants.PremiseTypes.premiseTypeFalse.id:
-          // set to false
-          falseStatements.push(premise.statements[0]);
-          break;
-        default:
-          break;
-      }
-    });
-
-    // set true and false assumptions based upon conditional premises
-    argument.premises.forEach((premise) => {
-      switch (premise.type.id) {
-        case constants.PremiseTypes.premiseTypeIfThen.id:
-          // if statement a is true, then statement b is true
-
-          break;
-        case constants.PremiseTypes.premiseTypeIfThenNot.id:
-          break;
-        case constants.PremiseTypes.premiseTypeOr.id:
-          break;
-        case constants.PremiseTypes.premiseTypeNor.id:
-          break;
-        case constants.PremiseTypes.premiseTypeXor.id:
-          break;
-        case constants.PremiseTypes.premiseTypeXnor.id:
-          break;
-        case constants.PremiseTypes.premiseTypeAnd.id:
-          break;
-        case constants.PremiseTypes.premiseTypeNand.id:
-          break;
-        default:
-          break;
-      }
-    });
-
-    // todo consider turning this into a while loop so that arguments do not
-    //  have to create chronological truth values (even if they should)
-
-    return [];
+    return this.invalidPremises;
   }
 
-  return {
-    isArgumentValid,
-    getInvalidPremises,
-  };
-}());
+  private addInvalidPremise(premise: Premise, reason: string) {
+    this.invalidPremises.push(
+      {
+        description: reason,
+        premise,
+      } as InvalidPremiseError,
+    );
+  }
 
-export default ArgumentCalculator;
+  private isInFalseStatements(statement: Statement): boolean {
+    for (let i = 0; i < this.falseStatements.length; i += 1) {
+      if (this.falseStatements[i].id === statement.id) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private isInTrueStatements(statement: Statement): boolean {
+    for (let i = 0; i < this.trueStatements.length; i += 1) {
+      if (this.trueStatements[i].id === statement.id) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private processTruthValueSettingStatements(): void {
+    this.argument.premises.map((premise) => {
+      const statement = premise.statements[0];
+
+      switch (premise.type.id) {
+        case premiseTypes.premiseTypeTrue.id:
+          // check if already given to false statements
+          if (this.isInFalseStatements(statement)) {
+            this.addInvalidPremise(
+              premise,
+              `Cannot set statement ${statement.id} to true, already set to false`,
+            );
+            break;
+          } else if (this.isInTrueStatements(statement)) {
+          // check if already given to true statements
+            this.addInvalidPremise(
+              premise,
+              `Inefficiency detected: cannot set statement ${statement.id} to true, already set to true`,
+            );
+            break;
+          }
+          // set to true
+          this.trueStatements.push(statement);
+          break;
+        case premiseTypes.premiseTypeFalse.id:
+          // check if already given to true statements
+          if (this.isInTrueStatements(statement)) {
+            this.addInvalidPremise(
+              premise,
+              `Cannot set statement ${statement.id} to false, already set to true`,
+            );
+            break;
+          } else if (this.isInFalseStatements(statement)) {
+          // check if already given to false statements
+            this.addInvalidPremise(
+              premise,
+              `Inefficiency detected: cannot set statement ${statement.id} to false, already set to false`,
+            );
+            break;
+          }
+          // set to false
+          this.falseStatements.push(statement);
+          break;
+        default:
+          break;
+      }
+
+      return null;
+    });
+  }
+}

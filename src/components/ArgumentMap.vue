@@ -36,8 +36,10 @@ import ArgumentCalculator from '@/utils/argument-calculator';
 export default class ArgumentMap extends Vue {
     @Prop() private argument!: Argument;
 
+    calculator = new ArgumentCalculator(this.argument);
+
     getFilledLabel = PremiseUtil.getFilledLabel;
 
-    isArgumentValid = ArgumentCalculator.isArgumentValid(this.argument);
+    isArgumentValid = this.calculator.isArgumentValid();
 }
 </script>
