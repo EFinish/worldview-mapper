@@ -20,6 +20,13 @@ export default class ArgumentCalculator {
     this.argument = argument;
   }
 
+  private resetCalc(): void {
+    this.trueStatements = [];
+    this.falseStatements = [];
+    this.premisesToProcess = [];
+    this.invalidPremises = [];
+  }
+
   isArgumentValid(): boolean {
     const invalidPremises = this.findInvalidPremises();
 
@@ -31,6 +38,7 @@ export default class ArgumentCalculator {
   }
 
   findInvalidPremises(): InvalidPremiseError[] {
+    this.resetCalc();
     this.processTruthValueSettingStatements();
 
     return this.invalidPremises;

@@ -7,7 +7,7 @@
         </b-row>
         <b-row>
             <b-col>
-                <ListArgument :argument="argument" />
+                <ListArgument :argument="argument" :errors="errors" />
             </b-col>
         </b-row>
         <b-row>
@@ -24,6 +24,7 @@ import ListArgument from '@/components/ListArgument.vue';
 
 import PremiseUtil from '@/utils/premise';
 import ArgumentCalculator from '@/utils/argument-calculator';
+import { InvalidPremiseError } from '@/utils/errors/InvalidPremiseError';
 
 @Component({
   components: {
@@ -35,8 +36,12 @@ export default class ArgumentMap extends Vue {
 
     calculator = new ArgumentCalculator(this.argument);
 
+    errors: InvalidPremiseError[] = this.calculator.findInvalidPremises();
+
     getFilledLabel = PremiseUtil.getFilledLabel;
 
-    isArgumentValid = this.calculator.isArgumentValid();
+    get isArgumentValid() {
+      return this.errors.length === 0;
+    }
 }
 </script>
