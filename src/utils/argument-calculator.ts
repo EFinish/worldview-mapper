@@ -79,7 +79,6 @@ export default class ArgumentCalculator {
 
       switch (premise.type.id) {
         case premiseTypes.premiseTypeTrue.id:
-          // check if already given to false statements
           if (this.isInFalseStatements(statement)) {
             this.addInvalidPremise(
               premise,
@@ -87,18 +86,15 @@ export default class ArgumentCalculator {
             );
             break;
           } else if (this.isInTrueStatements(statement)) {
-          // check if already given to true statements
             this.addInvalidPremise(
               premise,
               `Inefficiency detected: cannot set statement ${statement.id} to true, already set to true`,
             );
             break;
           }
-          // set to true
           this.trueStatements.push(statement);
           break;
         case premiseTypes.premiseTypeFalse.id:
-          // check if already given to true statements
           if (this.isInTrueStatements(statement)) {
             this.addInvalidPremise(
               premise,
@@ -106,14 +102,12 @@ export default class ArgumentCalculator {
             );
             break;
           } else if (this.isInFalseStatements(statement)) {
-          // check if already given to false statements
             this.addInvalidPremise(
               premise,
               `Inefficiency detected: cannot set statement ${statement.id} to false, already set to false`,
             );
             break;
           }
-          // set to false
           this.falseStatements.push(statement);
           break;
         default:
