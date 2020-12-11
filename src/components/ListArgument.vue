@@ -28,9 +28,9 @@ import PremiseUtil from '@/utils/premise';
 export default class ListArgument extends Vue {
     @Prop() private argument!: Argument;
 
-    @Prop({ default: [] as InvalidPremiseError[] }) private errors!: InvalidPremiseError[];
-
-    // @Prop({ default: false }) private showErrors!: boolean;
+    @Prop({
+      default: () => [] as InvalidPremiseError[],
+    }) private errors!: InvalidPremiseError[];
 
     getFilledLabel = PremiseUtil.getFilledLabel;
 
