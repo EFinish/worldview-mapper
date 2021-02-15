@@ -171,6 +171,15 @@ export default class ArgumentCalculator {
           case premiseTypes.premiseTypeIfThen.id:
             // IF true THEN true
             if (this.isInTrueStatements(statementFirst)) {
+              this.trueStatements.push(statementSecond);
+              this.removePremiseFromProcessing(premise);
+              processedAPremise = true;
+            }
+            break;
+            // IF THEN NOT
+          case premiseTypes.premiseTypeIfThenNot.id:
+            // IF true THEN false
+            if (this.isInTrueStatements(statementFirst)) {
               this.falseStatements.push(statementSecond);
               this.removePremiseFromProcessing(premise);
               processedAPremise = true;
