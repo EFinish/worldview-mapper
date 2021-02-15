@@ -14,7 +14,7 @@ new Vue({
   router,
   store,
   created: () => {
-    store.dispatch('initStoreForTesting');
+    store.dispatch('initStore');
   },
   render: (h) => h(App),
 }).$mount('#app');
