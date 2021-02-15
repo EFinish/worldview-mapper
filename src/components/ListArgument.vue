@@ -13,6 +13,12 @@
         </b-list-group-item>
         <b-list-group-item>
             C: {{ getFilledLabel(argument.conclusion) }}
+            <div
+                v-if="conclusionError">
+                <b-alert show variant="danger">
+                {{ conclusionError.description }}
+                </b-alert>
+            </div>
         </b-list-group-item>
     </b-list-group>
 </template>
@@ -31,6 +37,10 @@ export default class ListArgument extends Vue {
     @Prop({
       default: () => [] as InvalidPremiseError[],
     }) private errors!: InvalidPremiseError[];
+
+    @Prop({
+      default: () => null,
+    }) private conclusionError!: InvalidPremiseError;
 
     getFilledLabel = PremiseUtil.getFilledLabel;
 

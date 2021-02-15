@@ -12,9 +12,11 @@ export default class ArgumentCalculator {
 
   private falseStatements: Statement[] = [];
 
-  premisesToProcess: Premise[] = [];
+  private premisesToProcess: Premise[] = [];
 
   private invalidPremises: InvalidPremiseError[] = [];
+
+  private incorrectConclusionError: InvalidPremiseError;
 
   constructor(argument: Argument) {
     this.argument = argument;
@@ -25,6 +27,18 @@ export default class ArgumentCalculator {
     this.falseStatements = [];
     this.premisesToProcess = Object.assign([], this.argument.premises);
     this.invalidPremises = [];
+  }
+
+  get trueStatementsStack() {
+    return this.trueStatements;
+  }
+
+  get falseStatementsStack() {
+    return this.falseStatements;
+  }
+
+  get incorrectConclusion() {
+    return this.incorrectConclusionError;
   }
 
   isArgumentValid(): boolean {
@@ -41,17 +55,25 @@ export default class ArgumentCalculator {
     this.resetCalc();
     this.processTruthValueSettingPremises();
     this.processConditionalPremises();
+    this.processConclusion();
 
     return this.invalidPremises;
   }
 
-  private addInvalidPremise(premise: Premise, reason: string) {
+  private addInvalidPremise(premise: Premise, reason: string): void {
     this.invalidPremises.push(
       {
         description: reason,
         premise,
       } as InvalidPremiseError,
     );
+  }
+
+  private setIncorrectConclusion(reason: string): void{
+    this.incorrectConclusionError = {
+      description: reason,
+      premise: this.argument.conclusion,
+    } as InvalidPremiseError;
   }
 
   private isInFalseStatements(statement: Statement): boolean {
@@ -145,7 +167,9 @@ export default class ArgumentCalculator {
       this.premisesToProcess.map((premise) => {
         const [statementFirst, statementSecond] = premise.statements;
         switch (premise.type.id) {
+          // IF THEN
           case premiseTypes.premiseTypeIfThen.id:
+            // IF true THEN true
             if (this.isInTrueStatements(statementFirst)) {
               this.falseStatements.push(statementSecond);
               this.removePremiseFromProcessing(premise);
@@ -162,6 +186,30 @@ export default class ArgumentCalculator {
       if (this.premisesToProcess.length === 0 || processedAPremise === false) {
         processing = false;
       }
+    }
+  }
+
+  private processConclusion(): void {
+    const { conclusion } = this.argument;
+    const [statementFirst, statementSecond] = conclusion.statements;
+
+    switch (conclusion.type.id) {
+      case premiseTypes.premiseTypeTrue.id:
+        if (this.isInFalseStatements(statementFirst)) {
+          this.setIncorrectConclusion(
+            `Statement ${statementFirst.id} truth value is false`,
+          );
+        }
+        break;
+      case premiseTypes.premiseTypeFalse.id:
+        if (this.isInTrueStatements(statementFirst)) {
+          this.setIncorrectConclusion(
+            `Statement ${statementFirst.id} truth value is true`,
+          );
+        }
+        break;
+      default:
+        break;
     }
   }
 }
