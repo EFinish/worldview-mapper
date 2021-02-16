@@ -2,7 +2,7 @@
     <b-container>
         <b-row>
             <b-col>
-                <h4>Argument #{{ argument.id }}</h4>
+                <h4>#{{ argument.id }} - {{ argument.title }}</h4>
             </b-col>
         </b-row>
         <b-row>
@@ -80,7 +80,7 @@ export default class ArgumentMap extends Vue {
 
     errors: InvalidPremiseError[] = this.calculator.findInvalidPremises();
 
-    conclusionError = this.calculator.incorrectConclusion;
+    conclusionError = this.calculator.getConclusionError;
 
     getFilledLabel = PremiseUtil.getFilledLabel;
 
@@ -96,16 +96,16 @@ export default class ArgumentMap extends Vue {
       return true;
     }
 
-    get incorrectConclusion() {
+    get conclusion() {
       return this.conclusionError;
     }
 
     get statementTrueStack() {
-      return this.calculator.trueStatementsStack;
+      return this.calculator.getTrueStatements;
     }
 
     get statementFalseStack() {
-      return this.calculator.falseStatementsStack;
+      return this.calculator.getFalseStatements;
     }
 }
 </script>

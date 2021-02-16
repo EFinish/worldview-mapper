@@ -16,6 +16,20 @@
             </b-col>
         </b-row>
         <b-row>
+            <b-col>
+                <b-form-group
+                    :description="`Type in a title for the argument`"
+                    label="Argument Title"
+                    :label-for="`argumentTitle`"
+                    >
+                    <b-form-input
+                    id="argumentTitle"
+                    v-model="newArgument.title"
+                    trim></b-form-input>
+                </b-form-group>
+            </b-col>
+        </b-row>
+        <b-row>
           <b-col>
             <b-list-group>
               <b-list-group-item v-for="(premise, index) in newArgument.premises" :key="index">

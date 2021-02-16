@@ -16,7 +16,7 @@ export default class ArgumentCalculator {
 
   private invalidPremises: InvalidPremiseError[] = [];
 
-  private incorrectConclusionError: InvalidPremiseError;
+  private conclusionError!: InvalidPremiseError;
 
   constructor(argument: Argument) {
     this.argument = argument;
@@ -29,16 +29,16 @@ export default class ArgumentCalculator {
     this.invalidPremises = [];
   }
 
-  get trueStatementsStack() {
+  get getTrueStatements() {
     return this.trueStatements;
   }
 
-  get falseStatementsStack() {
+  get getFalseStatements() {
     return this.falseStatements;
   }
 
-  get incorrectConclusion() {
-    return this.incorrectConclusionError;
+  get getConclusionError() {
+    return this.conclusionError;
   }
 
   isArgumentValid(): boolean {
@@ -69,8 +69,8 @@ export default class ArgumentCalculator {
     );
   }
 
-  private setIncorrectConclusion(reason: string): void{
-    this.incorrectConclusionError = {
+  private setConclusion(reason: string): void{
+    this.conclusionError = {
       description: reason,
       premise: this.argument.conclusion,
     } as InvalidPremiseError;
@@ -96,24 +96,22 @@ export default class ArgumentCalculator {
     return false;
   }
 
-  private removePremiseFromProcessing(premise: Premise): void {
-    let indexOfPremise: number;
-
-    this.premisesToProcess.find((processPremise, index) => {
-      if (processPremise.id === premise.id) {
-        indexOfPremise = index;
-
-        return true;
-      }
-
-      return false;
+  private removePremiseFromProcessing(premiseIndexes: number[]): void {
+    premiseIndexes.forEach((value) => {
+      delete this.premisesToProcess[value];
     });
 
-    this.premisesToProcess = this.premisesToProcess.splice(0, indexOfPremise);
+    this.premisesToProcess.forEach((value, index) => {
+      if (value === undefined) {
+        this.premisesToProcess.splice(index, 1);
+      }
+    });
   }
 
   private processTruthValueSettingPremises(): void {
-    this.premisesToProcess.map((premise) => {
+    const premiseIndexesToRemove: number[] = [];
+
+    this.premisesToProcess.map((premise, premiseIndex) => {
       const statement = premise.statements[0];
 
       switch (premise.type.id) {
@@ -132,7 +130,7 @@ export default class ArgumentCalculator {
             break;
           }
           this.trueStatements.push(statement);
-          this.removePremiseFromProcessing(premise);
+          premiseIndexesToRemove.push(premiseIndex);
           break;
         case premiseTypes.premiseTypeFalse.id:
           if (this.isInTrueStatements(statement)) {
@@ -149,7 +147,7 @@ export default class ArgumentCalculator {
             break;
           }
           this.falseStatements.push(statement);
-          this.removePremiseFromProcessing(premise);
+          premiseIndexesToRemove.push(premiseIndex);
           break;
         default:
           break;
@@ -157,45 +155,55 @@ export default class ArgumentCalculator {
 
       return null;
     });
+
+    this.removePremiseFromProcessing(premiseIndexesToRemove);
   }
 
   private processConditionalPremises(): void {
-    let processing = true;
-    while (processing) {
-      let processedAPremise = false;
+    const premiseIndexesToRemove: number[] = [];
 
-      this.premisesToProcess.map((premise) => {
-        const [statementFirst, statementSecond] = premise.statements;
-        switch (premise.type.id) {
-          // IF THEN
-          case premiseTypes.premiseTypeIfThen.id:
-            // IF true THEN true
-            if (this.isInTrueStatements(statementFirst)) {
-              this.trueStatements.push(statementSecond);
-              this.removePremiseFromProcessing(premise);
-              processedAPremise = true;
+    this.premisesToProcess.map((premise, premiseIndex) => {
+      const [statementFirst, statementSecond] = premise.statements;
+      switch (premise.type.id) {
+        // IF x THEN y
+        case premiseTypes.premiseTypeIfThen.id:
+          // IF x true THEN y true
+          if (this.isInTrueStatements(statementFirst)) {
+            this.trueStatements.push(statementSecond);
+            premiseIndexesToRemove.push(premiseIndex);
+          }
+          break;
+          // IF x THEN NOT y
+        case premiseTypes.premiseTypeIfThenNot.id:
+          // IF x true THEN y false
+          if (this.isInTrueStatements(statementFirst)) {
+            this.falseStatements.push(statementSecond);
+            premiseIndexesToRemove.push(premiseIndex);
+          }
+          break;
+          // x OR y
+        case premiseTypes.premiseTypeOr.id:
+          // if !x and !y throw error
+          if (
+            this.isInFalseStatements(statementFirst)
+          ) {
+            if (this.isInFalseStatements(statementSecond)) {
+              this.addInvalidPremise(
+                premise,
+                `False premise: both statements ${statementFirst.id} and ${statementSecond.id} are false.`,
+              );
             }
-            break;
-            // IF THEN NOT
-          case premiseTypes.premiseTypeIfThenNot.id:
-            // IF true THEN false
-            if (this.isInTrueStatements(statementFirst)) {
-              this.falseStatements.push(statementSecond);
-              this.removePremiseFromProcessing(premise);
-              processedAPremise = true;
-            }
-            break;
-          default:
-            break;
-        }
-
-        return null;
-      });
-
-      if (this.premisesToProcess.length === 0 || processedAPremise === false) {
-        processing = false;
+          }
+          premiseIndexesToRemove.push(premiseIndex);
+          break;
+        default:
+          break;
       }
-    }
+
+      return null;
+    });
+
+    this.removePremiseFromProcessing(premiseIndexesToRemove);
   }
 
   private processConclusion(): void {
@@ -205,14 +213,14 @@ export default class ArgumentCalculator {
     switch (conclusion.type.id) {
       case premiseTypes.premiseTypeTrue.id:
         if (this.isInFalseStatements(statementFirst)) {
-          this.setIncorrectConclusion(
+          this.setConclusion(
             `Statement ${statementFirst.id} truth value is false`,
           );
         }
         break;
       case premiseTypes.premiseTypeFalse.id:
         if (this.isInTrueStatements(statementFirst)) {
-          this.setIncorrectConclusion(
+          this.setConclusion(
             `Statement ${statementFirst.id} truth value is true`,
           );
         }
