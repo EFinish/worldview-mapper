@@ -72,6 +72,7 @@ import ListArgument from '@/components/ListArgument.vue';
 import { State } from 'vuex-class';
 
 import PremiseUtil from '@/utils/premise';
+import { Argument, Statement } from '@/models';
 
 @Component({
   components: {
@@ -88,11 +89,11 @@ export default class Builder extends Vue {
 
   showArgumentStack = false;
 
-  @State('statementStack') statementStack: any
+  @State('statementStack') statementStack: Statement[]
 
-  @State('premiseStack') premiseStack: any
+  @State('premiseStack') premiseStack: Premise[]
 
-  @State('argumentStack') argumentStack: any
+  @State('argumentStack') argumentStack: Argument[]
 
   getFilledLabel = PremiseUtil.getFilledLabel;
 

@@ -1,5 +1,5 @@
 import {
-  Statement, Premise, Argument,
+  Statement, Premise,
 } from '@/models';
 import constants from '@/utils/constants';
 

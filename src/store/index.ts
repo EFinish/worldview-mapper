@@ -4,10 +4,7 @@ import Vuex from 'vuex';
 import {
   Statement, Premise, Argument,
 } from '@/models';
-import constants from '@/utils/constants';
 import initStoreForTesting from '@/store/init';
-
-const premiseTypes = constants.PremiseTypes;
 
 Vue.use(Vuex);
 

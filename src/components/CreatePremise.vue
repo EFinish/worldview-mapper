@@ -44,7 +44,7 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { State, Action } from 'vuex-class';
 
-import { Premise, PremiseType, Statement } from '@/models';
+import { Premise, Statement } from '@/models';
 import PremiseUtil from '@/utils/premise';
 import constants from '@/utils/constants';
 
@@ -60,7 +60,7 @@ export default class CreatePremise extends Vue {
 
   options = [];
 
-  @State('statementStack') statementStack: any
+  @State('statementStack') statementStack: Statement[]
 
   mounted() {
     this.options.push({ value: null, text: 'Please select an option' });

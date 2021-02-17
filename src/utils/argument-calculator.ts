@@ -303,6 +303,9 @@ export default class ArgumentCalculator {
     const { conclusion } = this.argument;
     const [statementFirst, statementSecond] = conclusion.statements;
 
+    // TODO
+    // calculate conditional conclusions
+    // allow for multiple conclusions
     switch (conclusion.type.id) {
       case premiseTypes.premiseTypeTrue.id:
         if (this.isInFalseStatements(statementFirst)) {

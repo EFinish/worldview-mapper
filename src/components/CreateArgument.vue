@@ -74,7 +74,7 @@ export default class CreateArgument extends Vue {
 
   premiseSelect: Premise = { type: { label: '', numStatements: 0 }, statements: [] };
 
-  @State('premiseStack') premiseStack: any
+  @State('premiseStack') premiseStack: Premise[]
 
   get premiseOptions() {
     return this.premiseStack.map(
