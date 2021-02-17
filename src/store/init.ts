@@ -52,6 +52,14 @@ export default function initStoreForTesting(context) {
             context.getters.getStatementFromStackById(1),
           ],
         } as Premise);
+  context.commit('ADD_TO_PREMISE_STACK',
+        {
+          type: premiseTypes.premiseTypeNor,
+          statements: [
+            context.getters.getStatementFromStackById(0),
+            context.getters.getStatementFromStackById(1),
+          ],
+        } as Premise);
   context.commit('ADD_TO_ARGUMENT_STACK',
     {
       title: 'valid true modus ponens',
@@ -97,5 +105,24 @@ export default function initStoreForTesting(context) {
         context.getters.getPremiseFromStackById(5),
       ],
       conclusion: context.getters.getPremiseFromStackById(4),
+    });
+  context.commit('ADD_TO_ARGUMENT_STACK',
+    {
+      title: 'valid true NOR',
+      premises: [
+        context.getters.getPremiseFromStackById(6),
+        context.getters.getPremiseFromStackById(3),
+        context.getters.getPremiseFromStackById(4),
+      ],
+      conclusion: context.getters.getPremiseFromStackById(4),
+    });
+  context.commit('ADD_TO_ARGUMENT_STACK',
+    {
+      title: 'valid untrue NOR',
+      premises: [
+        context.getters.getPremiseFromStackById(6),
+        context.getters.getPremiseFromStackById(1),
+      ],
+      conclusion: context.getters.getPremiseFromStackById(1),
     });
 }

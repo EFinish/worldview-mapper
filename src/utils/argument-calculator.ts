@@ -183,7 +183,7 @@ export default class ArgumentCalculator {
           break;
           // x OR y
         case premiseTypes.premiseTypeOr.id:
-          // if !x and !y throw error
+          // if !x and !y create error
           if (
             this.isInFalseStatements(statementFirst)
           ) {
@@ -193,6 +193,20 @@ export default class ArgumentCalculator {
                 `False premise: both statements ${statementFirst.id} and ${statementSecond.id} are false.`,
               );
             }
+          }
+          premiseIndexesToRemove.push(premiseIndex);
+          break;
+        // x NOR y
+        case premiseTypes.premiseTypeNor.id:
+          // both should be false, if either x or y are true then create error
+          if (
+            this.isInTrueStatements(statementFirst)
+            || this.isInTrueStatements(statementSecond)
+          ) {
+            this.addInvalidPremise(
+              premise,
+              `False premise: one of either statement ${statementFirst.id} or ${statementSecond.id} is true.`,
+            );
           }
           premiseIndexesToRemove.push(premiseIndex);
           break;
