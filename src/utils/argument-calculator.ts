@@ -210,6 +210,41 @@ export default class ArgumentCalculator {
           }
           premiseIndexesToRemove.push(premiseIndex);
           break;
+        // x XOR y
+        case premiseTypes.premiseTypeXor.id:
+          // either x is true or y is true, not both true, not both false
+          if (
+            this.isInFalseStatements(statementFirst)
+            && this.isInFalseStatements(statementSecond)
+          ) {
+            this.addInvalidPremise(
+              premise,
+              `False premise: both statements ${statementFirst.id} and ${statementSecond.id} are true.`,
+            );
+          } else if (
+            this.isInTrueStatements(statementFirst)
+            && this.isInTrueStatements(statementSecond)
+          ) {
+            this.addInvalidPremise(
+              premise,
+              `False premise: both statements ${statementFirst.id} and ${statementSecond.id} are false.`,
+            );
+          } else if (
+            !(
+              this.isInTrueStatements(statementFirst)
+              && !this.isInTrueStatements(statementSecond)
+            )
+            && !(
+              this.isInTrueStatements(statementSecond)
+              && !this.isInTrueStatements(statementFirst)
+            )
+          ) {
+            this.addInvalidPremise(
+              premise,
+              `False premise: neither statements ${statementFirst.id} and ${statementSecond.id} are true.`,
+            );
+          }
+          break;
         default:
           break;
       }
