@@ -245,6 +245,25 @@ export default class ArgumentCalculator {
             );
           }
           break;
+          // x XNOR y
+        case premiseTypes.premiseTypeXnor.id:
+          // both true, both false = ok
+          if (
+            (
+              this.isInTrueStatements(statementFirst)
+              && !this.isInTrueStatements(statementSecond)
+            )
+            || (
+              this.isInTrueStatements(statementSecond)
+              && !this.isInTrueStatements(statementFirst)
+            )
+          ) {
+            this.addInvalidPremise(
+              premise,
+              `False premise: either statements ${statementFirst.id} or ${statementSecond.id} are true and the other is not.`,
+            );
+          }
+          break;
         default:
           break;
       }

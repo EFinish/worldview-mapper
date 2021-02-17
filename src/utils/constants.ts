@@ -23,7 +23,7 @@ const PremiseTypesArray = [
     id: 6, name: 'XOR', label: 'EITHER p OR q (XOR)', numStatements: 2,
   } as PremiseType,
   {
-    id: 7, name: 'XNOR', label: 'EITHER (p AND q) OR (!p AND !q) (XNOR)', numStatements: 2,
+    id: 7, name: 'XNOR', label: 'BOTH/NEITHER p AND q (XNOR)', numStatements: 2,
   } as PremiseType,
   {
     id: 8, name: 'AND', label: 'p AND q', numStatements: 2,
