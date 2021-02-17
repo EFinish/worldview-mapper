@@ -94,7 +94,7 @@ export default function initStoreForTesting(context) {
         } as Premise);
   context.commit('ADD_TO_ARGUMENT_STACK',
     {
-      title: 'valid true modus ponens',
+      title: 'Modus Ponens',
       premises: [
         context.getters.getPremiseFromStackById(0),
         context.getters.getPremiseFromStackById(1),
@@ -103,7 +103,7 @@ export default function initStoreForTesting(context) {
     });
   context.commit('ADD_TO_ARGUMENT_STACK',
     {
-      title: 'valid true modus tollens',
+      title: 'Modus Tollens',
       premises: [
         context.getters.getPremiseFromStackById(0),
         context.getters.getPremiseFromStackById(4),
