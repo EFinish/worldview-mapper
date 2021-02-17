@@ -272,6 +272,18 @@ export default class ArgumentCalculator {
             );
           }
           break;
+        case premiseTypes.premiseTypeNand.id:
+          // anything but both being true = ok
+          if (
+            this.isInTrueStatements(statementFirst)
+            && this.isInTrueStatements(statementSecond)
+          ) {
+            this.addInvalidPremise(
+              premise,
+              `False premise: both statements ${statementFirst.id} and ${statementSecond.id} are true`,
+            );
+          }
+          break;
         default:
           this.addInvalidPremise(
             premise,

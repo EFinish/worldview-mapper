@@ -84,6 +84,14 @@ export default function initStoreForTesting(context) {
             context.getters.getStatementFromStackById(1),
           ],
         } as Premise);
+  context.commit('ADD_TO_PREMISE_STACK',
+        {
+          type: premiseTypes.premiseTypeNand,
+          statements: [
+            context.getters.getStatementFromStackById(0),
+            context.getters.getStatementFromStackById(1),
+          ],
+        } as Premise);
   context.commit('ADD_TO_ARGUMENT_STACK',
     {
       title: 'valid true modus ponens',
@@ -265,5 +273,34 @@ export default function initStoreForTesting(context) {
         context.getters.getPremiseFromStackById(4),
       ],
       conclusion: context.getters.getPremiseFromStackById(3),
+    });
+  context.commit('ADD_TO_ARGUMENT_STACK',
+    {
+      title: 'valid true x NAND y',
+      premises: [
+        context.getters.getPremiseFromStackById(10),
+        context.getters.getPremiseFromStackById(1),
+        context.getters.getPremiseFromStackById(4),
+      ],
+      conclusion: context.getters.getPremiseFromStackById(1),
+    });
+  context.commit('ADD_TO_ARGUMENT_STACK',
+    {
+      title: 'valid true x NAND',
+      premises: [
+        context.getters.getPremiseFromStackById(10),
+        context.getters.getPremiseFromStackById(1),
+      ],
+      conclusion: context.getters.getPremiseFromStackById(1),
+    });
+  context.commit('ADD_TO_ARGUMENT_STACK',
+    {
+      title: 'valid untrue x NAND y',
+      premises: [
+        context.getters.getPremiseFromStackById(10),
+        context.getters.getPremiseFromStackById(1),
+        context.getters.getPremiseFromStackById(2),
+      ],
+      conclusion: context.getters.getPremiseFromStackById(1),
     });
 }
