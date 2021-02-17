@@ -170,7 +170,6 @@ export default class ArgumentCalculator {
           // IF x true THEN y true
           if (this.isInTrueStatements(statementFirst)) {
             this.trueStatements.push(statementSecond);
-            premiseIndexesToRemove.push(premiseIndex);
           }
           break;
           // IF x THEN NOT y
@@ -178,7 +177,6 @@ export default class ArgumentCalculator {
           // IF x true THEN y false
           if (this.isInTrueStatements(statementFirst)) {
             this.falseStatements.push(statementSecond);
-            premiseIndexesToRemove.push(premiseIndex);
           }
           break;
           // x OR y
@@ -194,7 +192,6 @@ export default class ArgumentCalculator {
               );
             }
           }
-          premiseIndexesToRemove.push(premiseIndex);
           break;
         // x NOR y
         case premiseTypes.premiseTypeNor.id:
@@ -208,7 +205,6 @@ export default class ArgumentCalculator {
               `False premise: one of either statement ${statementFirst.id} or ${statementSecond.id} is true.`,
             );
           }
-          premiseIndexesToRemove.push(premiseIndex);
           break;
         // x XOR y
         case premiseTypes.premiseTypeXor.id:
@@ -264,10 +260,27 @@ export default class ArgumentCalculator {
             );
           }
           break;
+        case premiseTypes.premiseTypeAnd.id:
+          // both must be true
+          if (
+            !this.isInTrueStatements(statementFirst)
+            || !this.isInTrueStatements(statementSecond)
+          ) {
+            this.addInvalidPremise(
+              premise,
+              `False premise: either/both statements ${statementFirst.id} or/and ${statementSecond.id} is/are not true`,
+            );
+          }
+          break;
         default:
+          this.addInvalidPremise(
+            premise,
+            'False premise: Invalid premise type.',
+          );
           break;
       }
 
+      premiseIndexesToRemove.push(premiseIndex);
       return null;
     });
 

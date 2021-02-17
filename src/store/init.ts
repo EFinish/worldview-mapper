@@ -76,6 +76,14 @@ export default function initStoreForTesting(context) {
             context.getters.getStatementFromStackById(1),
           ],
         } as Premise);
+  context.commit('ADD_TO_PREMISE_STACK',
+        {
+          type: premiseTypes.premiseTypeAnd,
+          statements: [
+            context.getters.getStatementFromStackById(0),
+            context.getters.getStatementFromStackById(1),
+          ],
+        } as Premise);
   context.commit('ADD_TO_ARGUMENT_STACK',
     {
       title: 'valid true modus ponens',
@@ -218,5 +226,44 @@ export default function initStoreForTesting(context) {
         context.getters.getPremiseFromStackById(4),
       ],
       conclusion: context.getters.getPremiseFromStackById(1),
+    });
+  context.commit('ADD_TO_ARGUMENT_STACK',
+    {
+      title: 'valid true x AND y',
+      premises: [
+        context.getters.getPremiseFromStackById(9),
+        context.getters.getPremiseFromStackById(1),
+        context.getters.getPremiseFromStackById(2),
+      ],
+      conclusion: context.getters.getPremiseFromStackById(1),
+    });
+  context.commit('ADD_TO_ARGUMENT_STACK',
+    {
+      title: 'valid untrue x AND',
+      premises: [
+        context.getters.getPremiseFromStackById(9),
+        context.getters.getPremiseFromStackById(1),
+      ],
+      conclusion: context.getters.getPremiseFromStackById(1),
+    });
+  context.commit('ADD_TO_ARGUMENT_STACK',
+    {
+      title: 'valid untrue !x AND y',
+      premises: [
+        context.getters.getPremiseFromStackById(9),
+        context.getters.getPremiseFromStackById(3),
+        context.getters.getPremiseFromStackById(2),
+      ],
+      conclusion: context.getters.getPremiseFromStackById(3),
+    });
+  context.commit('ADD_TO_ARGUMENT_STACK',
+    {
+      title: 'valid untrue !x AND !y',
+      premises: [
+        context.getters.getPremiseFromStackById(9),
+        context.getters.getPremiseFromStackById(3),
+        context.getters.getPremiseFromStackById(4),
+      ],
+      conclusion: context.getters.getPremiseFromStackById(3),
     });
 }
