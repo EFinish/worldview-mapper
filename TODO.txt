@@ -1,0 +1,4 @@
+complete list for calculating all arguments in arguments.png
+allow for accurately calculating all conditional conclusions
+clean up argument-calculator and put functions into subfiles and subclasses
+change FE so that statements have bolder red (or another readable color) text
