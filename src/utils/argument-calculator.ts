@@ -1,3 +1,4 @@
+/* eslint-disable operator-linebreak */
 import { Argument, Statement, Premise } from '@/models';
 import { InvalidPremiseError } from '@/utils/errors/InvalidPremiseError';
 
@@ -61,15 +62,13 @@ export default class ArgumentCalculator {
   }
 
   private addInvalidPremise(premise: Premise, reason: string): void {
-    this.invalidPremises.push(
-      {
-        description: reason,
-        premise,
-      } as InvalidPremiseError,
-    );
+    this.invalidPremises.push({
+      description: reason,
+      premise,
+    } as InvalidPremiseError);
   }
 
-  private setConclusion(reason: string): void{
+  private setConclusionError(reason: string): void {
     this.conclusionError = {
       description: reason,
       premise: this.argument.conclusion,
@@ -159,6 +158,38 @@ export default class ArgumentCalculator {
     this.removePremiseFromProcessing(premiseIndexesToRemove);
   }
 
+  private findPremise(
+    premiseTypeId: number,
+    statementFirst: Statement,
+    statementSecond: Statement | null,
+  ): Premise | undefined {
+    return this.argument.premises.find((premise) => {
+      if (premise.type.id === premiseTypeId && premise.statements[0].id === statementFirst.id) {
+        if (statementSecond === null) {
+          return true;
+        }
+        if (statementSecond && premise.statements[1].id === statementSecond.id) {
+          return true;
+        }
+        return false;
+      }
+
+      return false;
+    });
+  }
+
+  private getPremisesByTypeId(premiseTypeId: number): Premise[] {
+    const premises: Premise[] = [];
+
+    this.argument.premises.forEach((premise) => {
+      if (premise.type.id === premiseTypeId) {
+        premises.push(premise);
+      }
+    });
+
+    return premises;
+  }
+
   private processConditionalPremises(): void {
     const premiseIndexesToRemove: number[] = [];
 
@@ -172,19 +203,17 @@ export default class ArgumentCalculator {
             this.trueStatements.push(statementSecond);
           }
           break;
-          // IF x THEN NOT y
+        // IF x THEN NOT y
         case premiseTypes.premiseTypeIfThenNot.id:
           // IF x true THEN y false
           if (this.isInTrueStatements(statementFirst)) {
             this.falseStatements.push(statementSecond);
           }
           break;
-          // x OR y
+        // x OR y
         case premiseTypes.premiseTypeOr.id:
           // if !x and !y create error
-          if (
-            this.isInFalseStatements(statementFirst)
-          ) {
+          if (this.isInFalseStatements(statementFirst)) {
             if (this.isInFalseStatements(statementSecond)) {
               this.addInvalidPremise(
                 premise,
@@ -196,10 +225,7 @@ export default class ArgumentCalculator {
         // x NOR y
         case premiseTypes.premiseTypeNor.id:
           // both should be false, if either x or y are true then create error
-          if (
-            this.isInTrueStatements(statementFirst)
-            || this.isInTrueStatements(statementSecond)
-          ) {
+          if (this.isInTrueStatements(statementFirst) || this.isInTrueStatements(statementSecond)) {
             this.addInvalidPremise(
               premise,
               `False premise: one of either statement ${statementFirst.id} or ${statementSecond.id} is true.`,
@@ -210,16 +236,16 @@ export default class ArgumentCalculator {
         case premiseTypes.premiseTypeXor.id:
           // either x is true or y is true, not both true, not both false
           if (
-            this.isInFalseStatements(statementFirst)
-            && this.isInFalseStatements(statementSecond)
+            this.isInFalseStatements(statementFirst) &&
+            this.isInFalseStatements(statementSecond)
           ) {
             this.addInvalidPremise(
               premise,
               `False premise: both statements ${statementFirst.id} and ${statementSecond.id} are true.`,
             );
           } else if (
-            this.isInTrueStatements(statementFirst)
-            && this.isInTrueStatements(statementSecond)
+            this.isInTrueStatements(statementFirst) &&
+            this.isInTrueStatements(statementSecond)
           ) {
             this.addInvalidPremise(
               premise,
@@ -227,13 +253,9 @@ export default class ArgumentCalculator {
             );
           } else if (
             !(
-              this.isInTrueStatements(statementFirst)
-              && !this.isInTrueStatements(statementSecond)
-            )
-            && !(
-              this.isInTrueStatements(statementSecond)
-              && !this.isInTrueStatements(statementFirst)
-            )
+              this.isInTrueStatements(statementFirst) && !this.isInTrueStatements(statementSecond)
+            ) &&
+            !(this.isInTrueStatements(statementSecond) && !this.isInTrueStatements(statementFirst))
           ) {
             this.addInvalidPremise(
               premise,
@@ -241,18 +263,13 @@ export default class ArgumentCalculator {
             );
           }
           break;
-          // x XNOR y
+        // x XNOR y
         case premiseTypes.premiseTypeXnor.id:
           // both true, both false = ok
           if (
-            (
-              this.isInTrueStatements(statementFirst)
-              && !this.isInTrueStatements(statementSecond)
-            )
-            || (
-              this.isInTrueStatements(statementSecond)
-              && !this.isInTrueStatements(statementFirst)
-            )
+            (this.isInTrueStatements(statementFirst) &&
+              !this.isInTrueStatements(statementSecond)) ||
+            (this.isInTrueStatements(statementSecond) && !this.isInTrueStatements(statementFirst))
           ) {
             this.addInvalidPremise(
               premise,
@@ -263,8 +280,8 @@ export default class ArgumentCalculator {
         case premiseTypes.premiseTypeAnd.id:
           // both must be true
           if (
-            !this.isInTrueStatements(statementFirst)
-            || !this.isInTrueStatements(statementSecond)
+            !this.isInTrueStatements(statementFirst) ||
+            !this.isInTrueStatements(statementSecond)
           ) {
             this.addInvalidPremise(
               premise,
@@ -274,10 +291,7 @@ export default class ArgumentCalculator {
           break;
         case premiseTypes.premiseTypeNand.id:
           // anything but both being true = ok
-          if (
-            this.isInTrueStatements(statementFirst)
-            && this.isInTrueStatements(statementSecond)
-          ) {
+          if (this.isInTrueStatements(statementFirst) && this.isInTrueStatements(statementSecond)) {
             this.addInvalidPremise(
               premise,
               `False premise: both statements ${statementFirst.id} and ${statementSecond.id} are true`,
@@ -285,10 +299,7 @@ export default class ArgumentCalculator {
           }
           break;
         default:
-          this.addInvalidPremise(
-            premise,
-            'False premise: Invalid premise type.',
-          );
+          this.addInvalidPremise(premise, 'False premise: Invalid premise type.');
           break;
       }
 
@@ -299,25 +310,101 @@ export default class ArgumentCalculator {
     this.removePremiseFromProcessing(premiseIndexesToRemove);
   }
 
+  private detectHypotheticalSyllogism(
+    statementFirst: Statement,
+    statementSecond: Statement,
+  ): boolean {
+    const ifThenPremises = this.getPremisesByTypeId(premiseTypes.premiseTypeIfThen.id);
+    let index = 0;
+    let trailingTargetStatements: Statement[] = [];
+    console.log(`FIND HYPOTHETICAL SYLLOGISM: IF ${statementFirst.id} THEN ${statementSecond.id}`);
+    while (index < ifThenPremises.length) {
+      console.log('NEW ROUND');
+      const ifThen = ifThenPremises[index];
+
+      console.log(
+        `INDEX ${index} - analyzing IF ${ifThen.statements[0].id} THEN ${ifThen.statements[1].id}`,
+      );
+      if (ifThen.statements[1].id === statementSecond.id) {
+        console.log(
+          `FOUND: THEN statement ${ifThen.statements[1].id} = conlusion THEN ${statementSecond.id}`,
+        );
+        trailingTargetStatements.push(ifThen.statements[0]);
+        console.log(
+          `ADD ${ifThen.statements[0].id} to trailing target statements`,
+          trailingTargetStatements,
+        );
+        ifThenPremises.splice(index, 1);
+        console.log('REMOVE processed if-then from array', ifThenPremises);
+        index = 0;
+
+        console.log(`SET index to ${index}`);
+      } else if (
+        trailingTargetStatements.find((statement) => statement.id === ifThen.statements[1].id)
+      ) {
+        console.log(
+          `FOUND: THEN ${ifThen.statements[1].id} IN trailing target statements`,
+          trailingTargetStatements,
+        );
+        if (ifThen.statements[0].id === statementFirst.id) {
+          console.log(
+            `FOUND: IF ${ifThen.statements[0].id} = conclusion IF ${statementFirst.id}`,
+            'RETURN TRUE',
+          );
+          return true;
+        }
+
+        const newTrailingTargetArray: Statement[] = trailingTargetStatements.map((statement) => {
+          if (statement.id === ifThen.statements[1].id) {
+            console.log(
+              `REPLACE ${statement.id} in trailing target statements WITH ${ifThen.statements[0].id}`,
+            );
+
+            return ifThen.statements[0];
+          }
+
+          return statement;
+        });
+        console.log('new trailing target statements', newTrailingTargetArray);
+        trailingTargetStatements = newTrailingTargetArray;
+        ifThenPremises.splice(index, 1);
+        console.log('REMOVE processed if-then from array', ifThenPremises);
+        index = 0;
+        console.log(`SET index to ${index}`);
+      } else {
+        index += 1;
+        console.log(`ADD index + 1 = ${index}`);
+      }
+    }
+
+    console.log(
+      `NOT FOUND: conditional chain for IF ${statementFirst.id} THEN ${statementSecond.id}`,
+      'RETURN FALSE',
+    );
+    return false;
+  }
+
   private processConclusion(): void {
     const { conclusion } = this.argument;
     const [statementFirst, statementSecond] = conclusion.statements;
 
-    // TODO
-    // calculate conditional conclusions
-    // allow for multiple conclusions
     switch (conclusion.type.id) {
+      // TRUTH SETTING
       case premiseTypes.premiseTypeTrue.id:
         if (this.isInFalseStatements(statementFirst)) {
-          this.setConclusion(
-            `Statement ${statementFirst.id} truth value is false`,
-          );
+          this.setConclusionError(`Statement ${statementFirst.id} truth value is false`);
         }
         break;
       case premiseTypes.premiseTypeFalse.id:
         if (this.isInTrueStatements(statementFirst)) {
-          this.setConclusion(
-            `Statement ${statementFirst.id} truth value is true`,
+          this.setConclusionError(`Statement ${statementFirst.id} truth value is true`);
+        }
+        break;
+      // CONDITIONALS
+      case premiseTypes.premiseTypeIfThen.id:
+        if (!this.detectHypotheticalSyllogism(statementFirst, statementSecond)) {
+          this.setConclusionError(
+            `Syllogism not found for IF ${statementFirst.id} THEN ${statementSecond.id}`,
           );
         }
         break;

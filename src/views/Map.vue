@@ -1,9 +1,9 @@
 <template>
-   <b-container fluid>
-     <b-row v-for="argument in argumentStack" :key="argument.id">
-        <b-col>
-          <ArgumentMap :argument="argument" />
-        </b-col>
+  <b-container fluid>
+    <b-row v-for="argument in argumentStack" :key="argument.id">
+      <b-col>
+        <ArgumentMap :argument="argument" />
+      </b-col>
     </b-row>
   </b-container>
 </template>
@@ -21,6 +21,6 @@ import { Argument } from '@/models';
   },
 })
 export default class Map extends Vue {
-    @State('argumentStack') argumentStack: Argument[]
+  @State('argumentStack') argumentStack: Argument[];
 }
 </script>
