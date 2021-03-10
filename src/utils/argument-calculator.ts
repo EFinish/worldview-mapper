@@ -95,6 +95,24 @@ export default class ArgumentCalculator {
     return false;
   }
 
+  private isConclusionEqualTo(
+    premiseTypeId: number,
+    statementFirst: Statement,
+    statementSecond: Statement | null,
+  ): boolean {
+    const { conclusion } = this.argument;
+
+    if (
+      conclusion.type.id === premiseTypeId &&
+      conclusion.statements[0].id === statementFirst.id &&
+      (statementSecond === null || conclusion.statements[1].id === statementSecond.id)
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
   private removePremiseFromProcessing(premiseIndexes: number[]): void {
     premiseIndexes.forEach((value) => {
       delete this.premisesToProcess[value];
@@ -241,7 +259,7 @@ export default class ArgumentCalculator {
           ) {
             this.addInvalidPremise(
               premise,
-              `False premise: both statements ${statementFirst.id} and ${statementSecond.id} are true.`,
+              `False premise: both statements ${statementFirst.id} and ${statementSecond.id} are false.`,
             );
           } else if (
             this.isInTrueStatements(statementFirst) &&
@@ -249,13 +267,19 @@ export default class ArgumentCalculator {
           ) {
             this.addInvalidPremise(
               premise,
-              `False premise: both statements ${statementFirst.id} and ${statementSecond.id} are false.`,
+              `False premise: both statements ${statementFirst.id} and ${statementSecond.id} are true`,
             );
           } else if (
             !(
               this.isInTrueStatements(statementFirst) && !this.isInTrueStatements(statementSecond)
             ) &&
-            !(this.isInTrueStatements(statementSecond) && !this.isInTrueStatements(statementFirst))
+            !(
+              this.isInTrueStatements(statementSecond) && !this.isInTrueStatements(statementFirst)
+            ) &&
+            !(
+              this.isConclusionEqualTo(premiseTypes.premiseTypeTrue.id, statementFirst, null) ||
+              this.isConclusionEqualTo(premiseTypes.premiseTypeTrue.id, statementSecond, null)
+            )
           ) {
             this.addInvalidPremise(
               premise,
@@ -310,6 +334,7 @@ export default class ArgumentCalculator {
     this.removePremiseFromProcessing(premiseIndexesToRemove);
   }
 
+  // (p -> q) ^ (q -> r) = (p -> r)
   private detectHypotheticalSyllogism(
     statementFirst: Statement,
     statementSecond: Statement,
@@ -384,6 +409,44 @@ export default class ArgumentCalculator {
     return false;
   }
 
+  // (p V q) ^ !p = q
+  private detectDisjunctiveSyllogism(conclusionStatement: Statement): boolean {
+    const xorPremises = this.getPremisesByTypeId(premiseTypes.premiseTypeXor.id);
+    const xorPremisesWithConclusion = xorPremises.filter((premise) => {
+      if (
+        premise.statements[0].id === conclusionStatement.id ||
+        premise.statements[1].id === conclusionStatement.id
+      ) {
+        return true;
+      }
+
+      return false;
+    });
+
+    const validXor = xorPremisesWithConclusion.find((premise) => {
+      if (
+        premise.statements[0].id === conclusionStatement.id &&
+        this.isInFalseStatements(premise.statements[1])
+      ) {
+        return true;
+      }
+      if (
+        premise.statements[1].id === conclusionStatement.id &&
+        this.isInFalseStatements(premise.statements[0])
+      ) {
+        return true;
+      }
+
+      return false;
+    });
+
+    if (validXor !== undefined) {
+      return true;
+    }
+
+    return false;
+  }
+
   private processConclusion(): void {
     const { conclusion } = this.argument;
     const [statementFirst, statementSecond] = conclusion.statements;
@@ -393,6 +456,10 @@ export default class ArgumentCalculator {
       case premiseTypes.premiseTypeTrue.id:
         if (this.isInFalseStatements(statementFirst)) {
           this.setConclusionError(`Statement ${statementFirst.id} truth value is false`);
+        } else if (!this.detectDisjunctiveSyllogism(statementFirst)) {
+          this.setConclusionError(
+            `Statement ${statementFirst.id} is not produced by a disjunctive syllogism`,
+          );
         }
         break;
       case premiseTypes.premiseTypeFalse.id:

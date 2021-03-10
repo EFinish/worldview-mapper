@@ -152,6 +152,22 @@ export default function initStoreForTesting(context) {
     conclusion: context.getters.getPremiseFromStackById(13),
   });
   context.commit('ADD_TO_ARGUMENT_STACK', {
+    title: 'Dysjunctive Syllogism',
+    premises: [
+      context.getters.getPremiseFromStackById(7),
+      context.getters.getPremiseFromStackById(3),
+    ],
+    conclusion: context.getters.getPremiseFromStackById(2),
+  });
+  context.commit('ADD_TO_ARGUMENT_STACK', {
+    title: 'Dysjunctive Syllogism - invalid',
+    premises: [
+      context.getters.getPremiseFromStackById(7),
+      context.getters.getPremiseFromStackById(3),
+    ],
+    conclusion: context.getters.getPremiseFromStackById(4),
+  });
+  context.commit('ADD_TO_ARGUMENT_STACK', {
     title: 'invalid untrue, x + !x = !x',
     premises: [
       context.getters.getPremiseFromStackById(1),
