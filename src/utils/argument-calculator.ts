@@ -409,6 +409,11 @@ export default class ArgumentCalculator {
     return false;
   }
 
+  private detectConstructiveDilemma(): boolean {
+    console.log(this.falseStatements);
+    return false;
+  }
+
   // (p V q) ^ !p = q
   private detectDisjunctiveSyllogism(conclusionStatement: Statement): boolean {
     const xorPremises = this.getPremisesByTypeId(premiseTypes.premiseTypeXor.id);
@@ -469,9 +474,20 @@ export default class ArgumentCalculator {
         break;
       // CONDITIONALS
       case premiseTypes.premiseTypeIfThen.id:
-        if (!this.detectHypotheticalSyllogism(statementFirst, statementSecond)) {
+        if (this.findPremise(premiseTypes.premiseTypeIfThen.id, statementFirst, statementSecond)) {
+          break;
+        } else if (!this.detectHypotheticalSyllogism(statementFirst, statementSecond)) {
           this.setConclusionError(
-            `Syllogism not found for IF ${statementFirst.id} THEN ${statementSecond.id}`,
+            `Hypothetical syllogism not found for IF ${statementFirst.id} THEN ${statementSecond.id}`,
+          );
+        }
+        break;
+      case premiseTypes.premiseTypeOr.id:
+        if (this.findPremise(premiseTypes.premiseTypeOr.id, statementFirst, statementSecond)) {
+          break;
+        } else if (!this.detectConstructiveDilemma()) {
+          this.setConclusionError(
+            `Constructive Dilemma not found for IF ${statementFirst.id} THEN ${statementSecond.id}`,
           );
         }
         break;
