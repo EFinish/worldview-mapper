@@ -409,8 +409,62 @@ export default class ArgumentCalculator {
     return false;
   }
 
-  private detectConstructiveDilemma(): boolean {
+  // (p -> q) ^ (r -> s) ^ (p V r) = (q V s)
+  private detectConstructiveDilemma(conclusion: Premise): boolean {
     console.log(this.falseStatements);
+
+    // 1. find (p -> q) and (r -> s) to fit conclusion (q V s)
+    const ifThenPremises = this.getPremisesByTypeId(premiseTypes.premiseTypeIfThen.id);
+    const validIfThenFirsts = ifThenPremises.filter(
+      (premise) => premise.statements[1].id === conclusion.statements[0].id,
+    );
+    const validIfThenSeconds = ifThenPremises.filter(
+      (premise) => premise.statements[1].id === conclusion.statements[1].id,
+    );
+
+    if (!validIfThenFirsts || !validIfThenSeconds) {
+      return false;
+    }
+
+    // 2. assuming conclusion is (q V s), find a possible (p V r) to fit (p -> q) ^ (r -> s)
+    const orPremises = this.getPremisesByTypeId(premiseTypes.premiseTypeOr.id);
+    const validOrPremise = orPremises.find((or) => {
+      // find (p -> q) for an or where (q V r)
+      const found = validIfThenFirsts.find((first) => {
+        if (first.statements[0].id === or.statements[0].id) {
+          // found p
+          const foundR = validIfThenSeconds.find(
+            (second) => second.statements[0].id === or.statements[1].id,
+          );
+
+          if (foundR) {
+            return true;
+          }
+        } else if (first.statements[0].id === or.statements[1].id) {
+          // found r
+          const foundP = validIfThenSeconds.find(
+            (second) => second.statements[0].id === or.statements[0].id,
+          );
+
+          if (foundP) {
+            return false;
+          }
+        }
+
+        return false;
+      });
+
+      if (found) {
+        return true;
+      }
+
+      return false;
+    });
+
+    if (validOrPremise) {
+      return true;
+    }
+
     return false;
   }
 
@@ -485,7 +539,7 @@ export default class ArgumentCalculator {
       case premiseTypes.premiseTypeOr.id:
         if (this.findPremise(premiseTypes.premiseTypeOr.id, statementFirst, statementSecond)) {
           break;
-        } else if (!this.detectConstructiveDilemma()) {
+        } else if (!this.detectConstructiveDilemma(conclusion)) {
           this.setConclusionError(
             `Constructive Dilemma not found for IF ${statementFirst.id} THEN ${statementSecond.id}`,
           );

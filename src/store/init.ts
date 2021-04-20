@@ -101,6 +101,20 @@ export default function initStoreForTesting(context) {
       context.getters.getStatementFromStackById(3),
     ],
   } as Premise);
+  context.commit('ADD_TO_PREMISE_STACK', {
+    type: premiseTypes.premiseTypeOr,
+    statements: [
+      context.getters.getStatementFromStackById(0),
+      context.getters.getStatementFromStackById(2),
+    ],
+  } as Premise);
+  context.commit('ADD_TO_PREMISE_STACK', {
+    type: premiseTypes.premiseTypeOr,
+    statements: [
+      context.getters.getStatementFromStackById(1),
+      context.getters.getStatementFromStackById(3),
+    ],
+  } as Premise);
   context.commit('ADD_TO_ARGUMENT_STACK', {
     title: 'Modus Ponens',
     premises: [
@@ -166,6 +180,24 @@ export default function initStoreForTesting(context) {
       context.getters.getPremiseFromStackById(3),
     ],
     conclusion: context.getters.getPremiseFromStackById(4),
+  });
+  context.commit('ADD_TO_ARGUMENT_STACK', {
+    title: 'Constructive Dilemma',
+    premises: [
+      context.getters.getPremiseFromStackById(0),
+      context.getters.getPremiseFromStackById(13),
+      context.getters.getPremiseFromStackById(15),
+    ],
+    conclusion: context.getters.getPremiseFromStackById(16),
+  });
+  context.commit('ADD_TO_ARGUMENT_STACK', {
+    title: 'Constructive Dilemma - invalid',
+    premises: [
+      context.getters.getPremiseFromStackById(0),
+      context.getters.getPremiseFromStackById(12),
+      context.getters.getPremiseFromStackById(15),
+    ],
+    conclusion: context.getters.getPremiseFromStackById(16),
   });
   context.commit('ADD_TO_ARGUMENT_STACK', {
     title: 'invalid untrue, x + !x = !x',
