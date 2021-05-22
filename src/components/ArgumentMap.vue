@@ -13,11 +13,18 @@
     <b-row>
       <b-col>
         <b-row>
-          <b-col><u>Valid</u></b-col>
+          <b-col><u>Validity</u></b-col>
         </b-row>
         <b-row>
-          <b-col>
-            <strong>{{ isArgumentValid }}</strong>
+          <b-col v-if="isArgumentValid">
+            <b-alert show variant="success">
+              Valid
+            </b-alert>
+          </b-col>
+          <b-col v-if="!isArgumentValid">
+            <b-alert show variant="danger">
+              Invalid
+            </b-alert>
           </b-col>
         </b-row>
       </b-col>
