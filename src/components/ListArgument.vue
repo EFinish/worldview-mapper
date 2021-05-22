@@ -17,7 +17,7 @@
         v-for="(note, index) in getPremiseNotesByPremiseId(premise.id)"
         :key="index"
         show
-        variant="primary"
+        variant="info"
       >
         {{ note.message }}
       </b-alert>
@@ -27,7 +27,7 @@
       <b-alert v-for="(error, index) in conclusionErrors" :key="index" show variant="danger">
         {{ error.message }}
       </b-alert>
-      <b-alert v-for="(note, index) in conclusionNotes" :key="index" show variant="primary">
+      <b-alert v-for="(note, index) in conclusionNotes" :key="index" show variant="info">
         {{ note.message }}
       </b-alert>
     </b-list-group-item>

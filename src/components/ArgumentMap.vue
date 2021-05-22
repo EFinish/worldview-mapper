@@ -37,7 +37,11 @@
         <b-row>
           <b-col>
             <b-list-group>
-              <b-list-group-item v-for="statement in trueStatements" :key="statement.id">
+              <b-list-group-item
+                v-for="statement in trueStatements"
+                :key="statement.id"
+                variant="info"
+              >
                 {{ statement.text }}
               </b-list-group-item>
             </b-list-group>
@@ -51,7 +55,11 @@
         <b-row>
           <b-col>
             <b-list-group>
-              <b-list-group-item v-for="statement in falseStatements" :key="statement.id">
+              <b-list-group-item
+                v-for="statement in falseStatements"
+                :key="statement.id"
+                variant="info"
+              >
                 {{ statement.text }}
               </b-list-group-item>
             </b-list-group>
