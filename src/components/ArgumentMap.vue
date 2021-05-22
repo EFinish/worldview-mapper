@@ -1,72 +1,69 @@
 <template>
-    <b-container>
+  <b-container>
+    <b-row>
+      <b-col>
+        <h4>#{{ argument.id }} - {{ argument.title }}</h4>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col>
+        <ListArgument :argument="argument" :errors="errors" :notes="notes" />
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col>
         <b-row>
-            <b-col>
-                <h4>#{{ argument.id }} - {{ argument.title }}</h4>
-            </b-col>
-        </b-row>
-        <b-row>
-            <b-col>
-                <ListArgument
-                  :argument="argument"
-                  :errors="errors"
-                  :conclusionError="conclusionError" />
-            </b-col>
-        </b-row>
-        <b-row>
-          <b-col>
-            <b-row>
-              <b-col><u>Valid</u></b-col>
-            </b-row>
-            <b-row>
-              <b-col>
-                <strong>{{ isArgumentValid }}</strong>
-              </b-col>
-            </b-row>
-          </b-col>
+          <b-col><u>Valid</u></b-col>
         </b-row>
         <b-row>
           <b-col>
-            <b-row>
-              <b-col><u>Truths</u></b-col>
-            </b-row>
-            <b-row>
-              <b-col>
-                <b-list-group>
-                  <b-list-group-item v-for="(statement) in statementTrueStack" :key="statement.id">
-                    {{ statement.id }}.) {{ statement.text }}
-                  </b-list-group-item>
-                </b-list-group>
-              </b-col>
-            </b-row>
-          </b-col>
-          <b-col>
-            <b-row>
-              <b-col><u>Falses</u></b-col>
-            </b-row>
-            <b-row>
-              <b-col>
-                <b-list-group>
-                  <b-list-group-item v-for="(statement) in statementFalseStack" :key="statement.id">
-                    {{ statement.id }}.) {{ statement.text }}
-                  </b-list-group-item>
-                </b-list-group>
-              </b-col>
-            </b-row>
+            <strong>{{ isArgumentValid }}</strong>
           </b-col>
         </b-row>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col>
+        <b-row>
+          <b-col><u>Truths</u></b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <b-list-group>
+              <b-list-group-item v-for="statement in trueStatements" :key="statement.id">
+                {{ statement.text }}
+              </b-list-group-item>
+            </b-list-group>
+          </b-col>
+        </b-row>
+      </b-col>
+      <b-col>
+        <b-row>
+          <b-col><u>Falses</u></b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <b-list-group>
+              <b-list-group-item v-for="statement in falseStatements" :key="statement.id">
+                {{ statement.text }}
+              </b-list-group-item>
+            </b-list-group>
+          </b-col>
+        </b-row>
+      </b-col>
+    </b-row>
   </b-container>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
-import { Argument } from '@/models';
+import Argument from '@/models/Argument';
 
 import ListArgument from '@/components/ListArgument.vue';
 
-import PremiseUtil from '@/utils/premise';
 import ArgumentCalculator from '@/utils/argument-calculator';
-import { InvalidPremiseError } from '@/utils/errors/InvalidPremiseError';
+import Statement from '@/models/Statement';
+import { Note } from '@/utils/notes/Note';
 
 @Component({
   components: {
@@ -74,38 +71,20 @@ import { InvalidPremiseError } from '@/utils/errors/InvalidPremiseError';
   },
 })
 export default class ArgumentMap extends Vue {
-    @Prop() private argument!: Argument;
+  @Prop() private argument!: Argument;
 
-    calculator = new ArgumentCalculator(this.argument);
+  calculator: ArgumentCalculator = new ArgumentCalculator(this.argument);
 
-    errors: InvalidPremiseError[] = this.calculator.findInvalidPremises();
+  trueStatements: Statement[] = this.calculator.getTrueStatements;
 
-    conclusionError = this.calculator.getConclusionError;
+  falseStatements: Statement[] = this.calculator.getFalseStatements;
 
-    getFilledLabel = PremiseUtil.getFilledLabel;
+  errors: Error[] = this.calculator.getErrors;
 
-    get isArgumentValid() {
-      return this.errors.length === 0;
-    }
+  notes: Note[] = this.calculator.getNotes;
 
-    get isConclusionCorrect() {
-      if (this.conclusionError) {
-        return false;
-      }
-
-      return true;
-    }
-
-    get conclusion() {
-      return this.conclusionError;
-    }
-
-    get statementTrueStack() {
-      return this.calculator.getTrueStatements;
-    }
-
-    get statementFalseStack() {
-      return this.calculator.getFalseStatements;
-    }
+  get isArgumentValid() {
+    return this.errors.length === 0;
+  }
 }
 </script>

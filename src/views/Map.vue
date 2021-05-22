@@ -13,7 +13,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import { State } from 'vuex-class';
 
 import ArgumentMap from '@/components/ArgumentMap.vue';
-import { Argument } from '@/models';
+import Argument from '@/models/Argument';
 
 @Component({
   components: {

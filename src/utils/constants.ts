@@ -1,52 +1,49 @@
-import { PremiseType } from '@/models';
+import { PropositionType } from '@/models/interfaces/PropositionType';
 
-const PremiseTypesArray = [
+export const PropositionTypesArray: PropositionType[] = [
   {
-    id: 0, name: 'TRUE', label: 'p IS TRUE', numStatements: 1,
-  } as PremiseType,
+    id: 0,
+    name: 'IF_THEN',
+    label: 'IF p THEN q',
+  } as PropositionType,
   {
-    id: 1, name: 'FALSE', label: 'p IS FALSE', numStatements: 1,
-  } as PremiseType,
+    id: 2,
+    name: 'OR',
+    label: 'p OR q',
+  } as PropositionType,
   {
-    id: 2, name: 'IF_THEN', label: 'IF p THEN q', numStatements: 2,
-  } as PremiseType,
+    id: 3,
+    name: 'NOR',
+    label: 'p NOR q',
+  } as PropositionType,
   {
-    id: 3, name: 'IF_THEN_NOT', label: 'IF p THEN NOT q', numStatements: 2,
-  } as PremiseType,
+    id: 4,
+    name: 'XOR',
+    label: 'EITHER p OR q (XOR)',
+  } as PropositionType,
   {
-    id: 4, name: 'OR', label: 'p OR q', numStatements: 2,
-  } as PremiseType,
+    id: 5,
+    name: 'XNOR',
+    label: 'BOTH/NEITHER p AND q (XNOR)',
+  } as PropositionType,
   {
-    id: 5, name: 'NOR', label: 'p NOR q', numStatements: 2,
-  } as PremiseType,
+    id: 6,
+    name: 'AND',
+    label: 'p AND q',
+  } as PropositionType,
   {
-    id: 6, name: 'XOR', label: 'EITHER p OR q (XOR)', numStatements: 2,
-  } as PremiseType,
-  {
-    id: 7, name: 'XNOR', label: 'BOTH/NEITHER p AND q (XNOR)', numStatements: 2,
-  } as PremiseType,
-  {
-    id: 8, name: 'AND', label: 'p AND q', numStatements: 2,
-  } as PremiseType,
-  {
-    id: 9, name: 'NAND', label: 'NOT p AND q (NAND)', numStatements: 2,
-  } as PremiseType,
+    id: 7,
+    name: 'NAND',
+    label: 'NOT p AND q (NAND)',
+  } as PropositionType,
 ];
 
-const PremiseTypes = {
-  premiseTypeTrue: PremiseTypesArray[0],
-  premiseTypeFalse: PremiseTypesArray[1],
-  premiseTypeIfThen: PremiseTypesArray[2],
-  premiseTypeIfThenNot: PremiseTypesArray[3],
-  premiseTypeOr: PremiseTypesArray[4],
-  premiseTypeNor: PremiseTypesArray[5],
-  premiseTypeXor: PremiseTypesArray[6],
-  premiseTypeXnor: PremiseTypesArray[7],
-  premiseTypeAnd: PremiseTypesArray[8],
-  premiseTypeNand: PremiseTypesArray[9],
-};
-
-export default {
-  PremiseTypesArray,
-  PremiseTypes,
+export const PropositionTypes = {
+  IfThen: PropositionTypesArray[0],
+  Or: PropositionTypesArray[1],
+  Nor: PropositionTypesArray[2],
+  Xor: PropositionTypesArray[3],
+  Xnor: PropositionTypesArray[4],
+  And: PropositionTypesArray[5],
+  Nand: PropositionTypesArray[6],
 };

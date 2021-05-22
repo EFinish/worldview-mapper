@@ -1,23 +1,32 @@
-import { Premise } from '@/models';
+import { Premise } from '@/models/interfaces/Premise';
+import TruthStatement from '@/models/TruthStatement';
+import Proposition from '@/models/Proposition';
 
-const PremiseUtil = (function () {
-  function getFilledLabel(premise: Premise): string {
-    let filledLabel = premise.type.label;
+const PremiseUtil = (() => {
+  const getFilledLabel = (premise: Premise): string => {
+    if (premise instanceof TruthStatement) {
+      return premise.truthValue
+        ? `${premise.statement.text} is TRUE`
+        : `${premise.statement.text} is FALSE`;
+    }
+    if (premise instanceof Proposition) {
+      let response = premise.type.label;
+      response = premise.truthStatements[0]
+        ? response.replace('p', getFilledLabel(premise.truthStatements[0]))
+        : response;
+      response = premise.truthStatements[1]
+        ? response.replace('q', getFilledLabel(premise.truthStatements[1]))
+        : response;
 
-    if (premise.statements[0]) {
-      filledLabel = filledLabel.replace('p', premise.statements[0].text);
+      return response;
     }
 
-    if (premise.statements[1]) {
-      filledLabel = filledLabel.replace('q', premise.statements[1].text);
-    }
-
-    return filledLabel;
-  }
+    return 'should not get here';
+  };
 
   return {
     getFilledLabel,
   };
-}());
+})();
 
 export default PremiseUtil;
