@@ -6,7 +6,7 @@ class PremiseNote implements Note {
 
   premise: Premise;
 
-  constructor(message: string, premise: Premise) {
+  constructor(premise: Premise, message: string) {
     this.message = message;
     this.premise = premise;
   }

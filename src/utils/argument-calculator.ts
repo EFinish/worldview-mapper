@@ -9,6 +9,7 @@ import { Note } from './notes/Note';
 import { PropositionTypes } from './constants';
 import InvalidConclusionError from './errors/InvalidConclusionError';
 import ConclusionNote from './notes/ConclusionNote';
+import PremiseNote from './notes/PremiseNote';
 
 export default class ArgumentCalculator {
   private argument: Argument;
@@ -60,6 +61,10 @@ export default class ArgumentCalculator {
 
   private addInvalidPremiseError(premise: Premise, reason: string): void {
     this.errors.push(new InvalidPremiseError(premise, reason));
+  }
+
+  private addPremiseNote(premise: Premise, message: string): void {
+    this.notes.push(new PremiseNote(premise, message));
   }
 
   private addInvalidConclusionError(reason: string): void {
@@ -214,24 +219,76 @@ export default class ArgumentCalculator {
             // IF x true THEN y true
             switch (truthStatementFirst.truthValue) {
               case true:
-                console.log('if x');
+                // IF x
                 if (this.isInTrueStatements(truthStatementFirst.statement)) {
                   if (truthStatementSecond.truthValue) {
+                    // THEN y
                     this.trueStatements.push(truthStatementSecond.statement);
                     break;
                   }
+                  // THEN !y
                   this.falseStatements.push(truthStatementSecond.statement);
+                  break;
+                } else if (
+                  truthStatementSecond.truthValue &&
+                  this.isInFalseStatements(truthStatementSecond.statement)
+                ) {
+                  // modus tollens
+                  // x -> y ^ !y = !x
+                  this.falseStatements.push(truthStatementFirst.statement);
+                  this.addPremiseNote(
+                    premise,
+                    `Modus Tollens: ${truthStatementFirst.statement.id} -> ${truthStatementSecond.statement.id} ^ ! ${truthStatementSecond.statement.id} = ! ${truthStatementFirst.id}`,
+                  );
+                  break;
+                } else if (
+                  !truthStatementSecond.truthValue &&
+                  this.isInTrueStatements(truthStatementSecond.statement)
+                ) {
+                  // modus tollens
+                  // x -> !y ^ y = !x
+                  this.falseStatements.push(truthStatementFirst.statement);
+                  this.addPremiseNote(
+                    premise,
+                    `Modus Tollens: ${truthStatementFirst.statement.id} -> ! ${truthStatementSecond.statement.id} ^ ${truthStatementSecond.statement.id} = ! ${truthStatementFirst.id}`,
+                  );
                   break;
                 }
                 break;
               case false:
-                console.log('if !x');
+                // IF !x
                 if (this.isInFalseStatements(truthStatementFirst.statement)) {
                   if (truthStatementSecond.truthValue) {
+                    // THEN y
                     this.trueStatements.push(truthStatementSecond.statement);
                     break;
                   }
+                  // THEN !y
                   this.falseStatements.push(truthStatementSecond.statement);
+                  break;
+                } else if (
+                  truthStatementSecond.truthValue &&
+                  this.isInFalseStatements(truthStatementSecond.statement)
+                ) {
+                  // modus tollens
+                  // !x -> y ^ !y = x
+                  this.trueStatements.push(truthStatementFirst.statement);
+                  this.addPremiseNote(
+                    premise,
+                    `Modus Tollens: ! ${truthStatementFirst.statement.id} -> ${truthStatementSecond.statement.id} ^ ! ${truthStatementSecond.statement.id} = ${truthStatementFirst.id}`,
+                  );
+                  break;
+                } else if (
+                  !truthStatementSecond.truthValue &&
+                  this.isInTrueStatements(truthStatementSecond.statement)
+                ) {
+                  // modus tollens
+                  // !x -> !y ^ y = x
+                  this.trueStatements.push(truthStatementFirst.statement);
+                  this.addPremiseNote(
+                    premise,
+                    `Modus Tollens: ! ${truthStatementFirst.statement.id} -> ! ${truthStatementSecond.statement.id} ^ ${truthStatementSecond.statement.id} = ${truthStatementFirst.id}`,
+                  );
                   break;
                 }
                 break;
