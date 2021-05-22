@@ -505,7 +505,7 @@ export default class ArgumentCalculator {
     return false;
   }
 
-  // // (p -> q) ^ (r -> s) ^ (!q V !s) = (!p V !r)
+  // (p -> q) ^ (r -> s) ^ (!q V !s) = (!p V !r)
   private detectDestructiveDilemma(): boolean {
     console.log(this.falseStatements);
     return false;

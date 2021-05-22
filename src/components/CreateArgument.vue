@@ -68,7 +68,7 @@ interface ArgumentScaffolding {
 }
 
 interface SelectOption {
-  value: any;
+  value: unknown;
   text: string;
 }
 
@@ -82,7 +82,8 @@ export default class CreateArgument extends Vue {
 
   premiseToAdd: Premise | null = null;
 
-  @State('premiseStack') premiseStack: Premise[];
+  @State('premiseStack')
+  premiseStack!: Premise[];
 
   get premiseOptions(): SelectOption[] {
     return this.premiseStack.map((premise: Premise) => ({

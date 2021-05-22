@@ -1,5 +1,5 @@
 export interface Payload {
-  data: any;
+  data: unknown;
   status: string;
   error?: Error;
 }

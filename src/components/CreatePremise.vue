@@ -150,9 +150,11 @@ export default class CreatePremise extends Vue {
     truthValue: true,
   };
 
-  @State('premiseStack') premiseStack: Premise[];
+  @State('premiseStack')
+  premiseStack!: Premise[];
 
-  @State('statementStack') statementStack: Statement[];
+  @State('statementStack')
+  statementStack!: Statement[];
 
   @Action('addTruthStatementToPremiseStack')
   addTruthStatementToPremiseStack!: (
