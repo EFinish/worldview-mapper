@@ -4,7 +4,7 @@
       <router-link to="/builder">Builder</router-link> |
       <router-link to="/map">Map</router-link>
     </div>
-    <router-view/>
+    <router-view />
   </div>
 </template>
 
@@ -28,5 +28,17 @@
       color: #42b983;
     }
   }
+}
+
+.text-success {
+  color: var(--primary);
+}
+
+.text-danger {
+  color: var(--danger);
+}
+
+.text-primary {
+  color: var(--primary);
 }
 </style>

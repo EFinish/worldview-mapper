@@ -17,12 +17,12 @@
         </b-row>
         <b-row>
           <b-col v-if="isArgumentValid">
-            <b-alert show variant="success">
+            <b-alert show variant="info">
               Valid
             </b-alert>
           </b-col>
           <b-col v-if="!isArgumentValid">
-            <b-alert show variant="danger">
+            <b-alert show variant="warning">
               Invalid
             </b-alert>
           </b-col>
@@ -40,7 +40,7 @@
               <b-list-group-item
                 v-for="statement in trueStatements"
                 :key="statement.id"
-                variant="info"
+                variant="success"
               >
                 {{ statement.text }}
               </b-list-group-item>
@@ -58,7 +58,7 @@
               <b-list-group-item
                 v-for="statement in falseStatements"
                 :key="statement.id"
-                variant="info"
+                variant="danger"
               >
                 {{ statement.text }}
               </b-list-group-item>

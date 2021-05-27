@@ -769,17 +769,21 @@ export default class ArgumentCalculator {
     const conclusion: TruthStatement = this.argument.conclusion;
     if (conclusion.truthValue && this.detectDisjunctiveSyllogism(conclusion.statement.id)) {
       this.addConclusionNote('Disjunctive Syllogism detected');
-      return;
-    }
-    if (conclusion.truthValue && !this.isInTrueStatements(conclusion.statement)) {
+    } else if (conclusion.truthValue && !this.isInTrueStatements(conclusion.statement)) {
       this.addInvalidConclusionError(
         "Conclusion's statement was found to false when it was expected to be true.",
       );
-    }
-    if (!conclusion.truthValue && !this.isInFalseStatements(conclusion.statement)) {
+    } else if (!conclusion.truthValue && !this.isInFalseStatements(conclusion.statement)) {
       this.addInvalidConclusionError(
         "Conclusion's statement was found to true when it was expected to be false.",
       );
+    }
+
+    if (conclusion.truthValue) {
+      this.trueStatements.push(conclusion.statement);
+    }
+    if (!conclusion.truthValue) {
+      this.falseStatements.push(conclusion.statement);
     }
   }
 

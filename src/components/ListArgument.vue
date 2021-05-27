@@ -4,12 +4,12 @@
       <div>{{ argument.title }}</div>
     </b-list-group-item>
     <b-list-group-item v-for="(premise, index) in argument.premises" :key="index">
-      <div>{{ index + 1 }}.) ({{ premise.id }}) {{ getFilledLabel(premise) }}</div>
+      <div>{{ index + 1 }}.) <PremiseLabel :premise="premise" :colored="true" /></div>
       <b-alert
         v-for="(error, index) in getPremiseErrorsByPremiseId(premise.id)"
         :key="index"
         show
-        variant="danger"
+        variant="warning"
       >
         {{ error.message }}
       </b-alert>
@@ -23,7 +23,7 @@
       </b-alert>
     </b-list-group-item>
     <b-list-group-item>
-      C: {{ getFilledLabel(argument.conclusion) }}
+      C: <PremiseLabel :premise="argument.conclusion" :colored="true" />
       <b-alert v-for="(error, index) in conclusionErrors" :key="index" show variant="danger">
         {{ error.message }}
       </b-alert>
@@ -45,7 +45,13 @@ import { Note } from '@/utils/notes/Note';
 import ConclusionNote from '@/utils/notes/ConclusionNote';
 import PremiseNote from '@/utils/notes/PremiseNote';
 
-@Component
+import PremiseLabel from '@/components/PremiseLabel.vue';
+
+@Component({
+  components: {
+    PremiseLabel,
+  },
+})
 export default class ListArgument extends Vue {
   @Prop() private argument!: Argument;
 
