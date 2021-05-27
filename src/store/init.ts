@@ -4,10 +4,14 @@ const propositionTypes = PropositionTypes;
 
 export default function initStoreForTesting(context) {
   // STATEMENTS
-  context.commit('ADD_TO_STATEMENT_STACK', { text: 'the weather is snowing' });
-  context.commit('ADD_TO_STATEMENT_STACK', { text: 'I will drink hot tea' });
-  context.commit('ADD_TO_STATEMENT_STACK', { text: 'sleep will come to me' });
-  context.commit('ADD_TO_STATEMENT_STACK', { text: 'my body will be healthier' });
+  // context.commit('ADD_TO_STATEMENT_STACK', { text: 'the weather is snowing' });
+  // context.commit('ADD_TO_STATEMENT_STACK', { text: 'I will drink hot tea' });
+  // context.commit('ADD_TO_STATEMENT_STACK', { text: 'sleep will come to me' });
+  // context.commit('ADD_TO_STATEMENT_STACK', { text: 'my body will be healthier' });
+  context.commit('ADD_TO_STATEMENT_STACK', { text: 'A' });
+  context.commit('ADD_TO_STATEMENT_STACK', { text: 'B' });
+  context.commit('ADD_TO_STATEMENT_STACK', { text: 'C' });
+  context.commit('ADD_TO_STATEMENT_STACK', { text: 'D' });
   // TRUTH STATEMENTS
   context.commit('ADD_TRUTH_STATEMENT_TO_PREMISE_STACK', {
     statement: context.getters.getStatementFromStackById(0),
@@ -101,7 +105,7 @@ export default function initStoreForTesting(context) {
   context.commit('ADD_PROPOSITION_TO_PREMISE_STACK', {
     type: propositionTypes.Or,
     truthStatements: [
-      context.getters.getPremiseFromStackById(3),
+      context.getters.getPremiseFromStackById(1),
       context.getters.getPremiseFromStackById(5),
     ],
   });
@@ -219,7 +223,7 @@ export default function initStoreForTesting(context) {
       context.getters.getPremiseFromStackById(0),
     ],
     conclusion: context.getters.getPremiseFromStackById(2),
-    title: 'Modus Ponens',
+    title: 'Modus Ponens x -> y ^ y = x',
   });
   context.commit('ADD_TO_ARGUMENT_STACK', {
     premises: [
@@ -227,7 +231,7 @@ export default function initStoreForTesting(context) {
       context.getters.getPremiseFromStackById(3),
     ],
     conclusion: context.getters.getPremiseFromStackById(1),
-    title: 'Modus Tollens',
+    title: 'Modus Tollens x -> y ^ !y = !x',
   });
   context.commit('ADD_TO_ARGUMENT_STACK', {
     premises: [
@@ -235,7 +239,7 @@ export default function initStoreForTesting(context) {
       context.getters.getPremiseFromStackById(9),
     ],
     conclusion: context.getters.getPremiseFromStackById(10),
-    title: 'Hypothetical Syllogism',
+    title: 'Hypothetical Syllogism (p -> q) ^ (q -> r) = (p -> r)',
   });
   context.commit('ADD_TO_ARGUMENT_STACK', {
     premises: [
@@ -243,7 +247,7 @@ export default function initStoreForTesting(context) {
       context.getters.getPremiseFromStackById(1),
     ],
     conclusion: context.getters.getPremiseFromStackById(2),
-    title: 'Disjunctive Syllogism',
+    title: 'Disjunctive Syllogism (p V q) ^ !p = q',
   });
   context.commit('ADD_TO_ARGUMENT_STACK', {
     premises: [
@@ -252,7 +256,7 @@ export default function initStoreForTesting(context) {
       context.getters.getPremiseFromStackById(13),
     ],
     conclusion: context.getters.getPremiseFromStackById(14),
-    title: 'Constructive Dilemma',
+    title: 'Constructive Dilemma (p -> q) ^ (r -> s) ^ (p V r) = (q V s)',
   });
   context.commit('ADD_TO_ARGUMENT_STACK', {
     premises: [
@@ -261,7 +265,7 @@ export default function initStoreForTesting(context) {
       context.getters.getPremiseFromStackById(15),
     ],
     conclusion: context.getters.getPremiseFromStackById(16),
-    title: 'Destructive Dilemma',
+    title: 'Destructive Dilemma (p -> q) ^ (r -> s) ^ (!q V !s) = (!p V !r)',
   });
   // context.commit('ADD_TO_ARGUMENT_STACK', {
   //   title: 'invalid untrue, x + !x = !x',
