@@ -20,6 +20,8 @@ export default class ArgumentCalculator {
 
   private premisesToProcess: Premise[] = [];
 
+  private premisesToPostProcess: Premise[] = [];
+
   private errors: Error[] = [];
 
   private notes: Note[] = [];
@@ -57,6 +59,7 @@ export default class ArgumentCalculator {
     await this.processTruthStatements();
     await this.processProposition();
     await this.processConclusion();
+    await this.postProcessPropositions();
   }
 
   private addInvalidPremiseError(premise: Premise, reason: string): void {
@@ -107,11 +110,14 @@ export default class ArgumentCalculator {
     });
   }
 
+  private addPremiseToPostProcessing(premise: Premise): void {
+    this.premisesToPostProcess.push(premise);
+  }
+
   private async processTruthStatements(): Promise<void> {
     const premiseIndexesToRemove: number[] = [];
 
     this.premisesToProcess.forEach((premise, premiseIndex) => {
-      console.log('truth statement');
       if (premise instanceof TruthStatement) {
         switch (premise.truthValue) {
           case true:
@@ -196,12 +202,10 @@ export default class ArgumentCalculator {
   }
 
   private async processProposition(): Promise<void> {
-    console.log(this.argument);
     const premiseIndexesToRemove: number[] = [];
 
     // eslint-disable-next-line consistent-return
     this.premisesToProcess.forEach((premise, premiseIndex) => {
-      console.log('proposition');
       if (premise instanceof Proposition) {
         // const [statementFirst, statementSecond] = premise.statements;
         const [truthStatementFirst, truthStatementSecond] = premise.truthStatements;
@@ -213,8 +217,6 @@ export default class ArgumentCalculator {
           : this.isInFalseStatements(truthStatementSecond.statement);
 
         switch (premise.type.id) {
-          // TODO: need to add postprocessing for some propositions.
-          //  If a conclusion is true and valid, it may allow for the removale of a premises' error.
           case PropositionTypes.IfThen.id:
             // IF x true THEN y true
             switch (truthStatementFirst.truthValue) {
@@ -300,6 +302,82 @@ export default class ArgumentCalculator {
           case PropositionTypes.Or.id:
             // if !x and !y create error
             if (!statementFirstTruthProduct && !statementSecondTruthProduct) {
+              this.addPremiseToPostProcessing(premise);
+            }
+            break;
+          // x NOR y
+          case PropositionTypes.Nor.id:
+            // both should be false, if either x or y are true then create error
+            if (statementFirstTruthProduct) {
+              this.addPremiseToPostProcessing(premise);
+            }
+            if (statementSecondTruthProduct) {
+              this.addPremiseToPostProcessing(premise);
+            }
+            break;
+          // x XOR y
+          case PropositionTypes.Xor.id:
+            // either x is true or y is true, not both true, not both false
+            if (statementFirstTruthProduct && statementSecondTruthProduct) {
+              this.addPremiseToPostProcessing(premise);
+            }
+            if (!statementFirstTruthProduct && !statementSecondTruthProduct) {
+              this.addPremiseToPostProcessing(premise);
+            }
+            break;
+          // x XNOR y
+          case PropositionTypes.Xnor.id:
+            // both true, both false = ok
+            if (
+              (statementFirstTruthProduct && !statementSecondTruthProduct) ||
+              (!statementFirstTruthProduct && statementSecondTruthProduct)
+            ) {
+              this.addPremiseToPostProcessing(premise);
+            }
+            break;
+          case PropositionTypes.Nand.id:
+            // anything but both being true = ok
+            if (statementFirstTruthProduct && statementSecondTruthProduct) {
+              this.addPremiseToPostProcessing(premise);
+            }
+            break;
+          case PropositionTypes.And.id:
+            // must both be true
+            if (!statementFirstTruthProduct) {
+              this.addPremiseToPostProcessing(premise);
+            }
+            if (!statementSecondTruthProduct) {
+              this.addPremiseToPostProcessing(premise);
+            }
+            break;
+          default:
+            this.addInvalidPremiseError(premise, 'False premise: Invalid premise type.');
+            break;
+        }
+        premiseIndexesToRemove.push(premiseIndex);
+        return null;
+      }
+    });
+    this.removePremiseFromProcessing(premiseIndexesToRemove);
+  }
+
+  private async postProcessPropositions(): Promise<void> {
+    this.premisesToProcess.forEach((premise) => {
+      if (premise instanceof Proposition) {
+        // const [statementFirst, statementSecond] = premise.statements;
+        const [truthStatementFirst, truthStatementSecond] = premise.truthStatements;
+        const statementFirstTruthProduct: boolean = truthStatementFirst.truthValue
+          ? this.isInTrueStatements(truthStatementFirst.statement)
+          : this.isInFalseStatements(truthStatementFirst.statement);
+        const statementSecondTruthProduct: boolean = truthStatementSecond.truthValue
+          ? this.isInTrueStatements(truthStatementSecond.statement)
+          : this.isInFalseStatements(truthStatementSecond.statement);
+
+        switch (premise.type.id) {
+          // x OR y
+          case PropositionTypes.Or.id:
+            // if !x and !y create error
+            if (!statementFirstTruthProduct && !statementSecondTruthProduct) {
               this.addInvalidPremiseError(
                 premise,
                 `False premise: products both statements ${truthStatementFirst.statement.id} and ${truthStatementSecond.statement.id} are false in an OR. At least one product must be true.`,
@@ -379,11 +457,10 @@ export default class ArgumentCalculator {
             this.addInvalidPremiseError(premise, 'False premise: Invalid premise type.');
             break;
         }
-        premiseIndexesToRemove.push(premiseIndex);
         return null;
       }
+      return null;
     });
-    this.removePremiseFromProcessing(premiseIndexesToRemove);
   }
 
   // (p -> q) ^ (q -> r) = (p -> r)
