@@ -207,7 +207,6 @@ export default class ArgumentCalculator {
     // eslint-disable-next-line consistent-return
     this.premisesToProcess.forEach((premise, premiseIndex) => {
       if (premise instanceof Proposition) {
-        // const [statementFirst, statementSecond] = premise.statements;
         const [truthStatementFirst, truthStatementSecond] = premise.truthStatements;
         const statementFirstTruthProduct: boolean = truthStatementFirst.truthValue
           ? this.isInTrueStatements(truthStatementFirst.statement)
@@ -362,9 +361,8 @@ export default class ArgumentCalculator {
   }
 
   private async postProcessPropositions(): Promise<void> {
-    this.premisesToProcess.forEach((premise) => {
+    this.premisesToPostProcess.forEach((premise) => {
       if (premise instanceof Proposition) {
-        // const [statementFirst, statementSecond] = premise.statements;
         const [truthStatementFirst, truthStatementSecond] = premise.truthStatements;
         const statementFirstTruthProduct: boolean = truthStatementFirst.truthValue
           ? this.isInTrueStatements(truthStatementFirst.statement)
