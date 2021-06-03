@@ -123,6 +123,13 @@ export default function initStoreForTesting(context) {
       context.getters.getPremiseFromStackById(5),
     ],
   });
+  context.commit('ADD_PROPOSITION_TO_PREMISE_STACK', {
+    type: propositionTypes.And,
+    truthStatements: [
+      context.getters.getPremiseFromStackById(0),
+      context.getters.getPremiseFromStackById(2),
+    ],
+  });
   // ARGUMENTS
   context.commit('ADD_TO_ARGUMENT_STACK', {
     premises: [
@@ -189,6 +196,19 @@ export default function initStoreForTesting(context) {
       context.getters.getPremiseFromStackById(2),
     ],
     conclusion: context.getters.getPremiseFromStackById(0),
-    title: 'Simplification p ^ q = 1',
+    title: 'Simplification p ^ q = p',
+  });
+  context.commit('ADD_TO_ARGUMENT_STACK', {
+    premises: [
+      context.getters.getPremiseFromStackById(0),
+      context.getters.getPremiseFromStackById(2),
+    ],
+    conclusion: context.getters.getPremiseFromStackById(19),
+    title: 'Conjunction p ^ q = (p ^ q)',
+  });
+  context.commit('ADD_TO_ARGUMENT_STACK', {
+    premises: [context.getters.getPremiseFromStackById(0)],
+    conclusion: context.getters.getPremiseFromStackById(13),
+    title: 'Addition p = (p V q)',
   });
 }

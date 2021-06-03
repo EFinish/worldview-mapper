@@ -868,14 +868,20 @@ export default class ArgumentCalculator {
   private async processPropositionConclusion(): Promise<void> {
     // eslint-disable-next-line prefer-destructuring
     const conclusion: Proposition = this.argument.conclusion;
+    const conclusionTruthStatementFirst = conclusion.truthStatements[0];
+    const conclusionTruthStatementSecond = conclusion.truthStatements[1];
+    const conclusionTruthStatementFirstId = conclusionTruthStatementFirst.statement.id;
+    const conclusionTruthStatementFirstTruthValue = conclusionTruthStatementFirst.truthValue;
+    const conclusionTruthStatementSecondId = conclusionTruthStatementSecond.statement.id;
+    const conclusionTruthStatementSecondTruthValue = conclusionTruthStatementSecond.truthValue;
 
     if (
       this.findPropositionInArgument(
         conclusion.type.id,
-        conclusion.truthStatements[0].statement.id,
-        conclusion.truthStatements[0].truthValue,
-        conclusion.truthStatements[1].statement.id,
-        conclusion.truthStatements[1].truthValue,
+        conclusionTruthStatementFirstId,
+        conclusionTruthStatementFirstTruthValue,
+        conclusionTruthStatementSecondId,
+        conclusionTruthStatementSecondTruthValue,
       ) !== undefined
     ) {
       this.addConclusionNote('Exact condition found in premises.');
@@ -887,10 +893,10 @@ export default class ArgumentCalculator {
       case PropositionTypes.IfThen.id:
         if (
           this.detectHypotheticalSyllogism(
-            conclusion.truthStatements[0].statement.id,
-            conclusion.truthStatements[0].truthValue,
-            conclusion.truthStatements[1].statement.id,
-            conclusion.truthStatements[1].truthValue,
+            conclusionTruthStatementFirstId,
+            conclusionTruthStatementFirstTruthValue,
+            conclusionTruthStatementSecondId,
+            conclusionTruthStatementSecondTruthValue,
           )
         ) {
           this.addConclusionNote('Hypothetical Syllogism detected');
@@ -903,10 +909,10 @@ export default class ArgumentCalculator {
       case PropositionTypes.Or.id:
         if (
           this.detectConstructiveDilemma(
-            conclusion.truthStatements[0].statement.id,
-            conclusion.truthStatements[0].truthValue,
-            conclusion.truthStatements[1].statement.id,
-            conclusion.truthStatements[1].truthValue,
+            conclusionTruthStatementFirstId,
+            conclusionTruthStatementFirstTruthValue,
+            conclusionTruthStatementSecondId,
+            conclusionTruthStatementSecondTruthValue,
           )
         ) {
           this.addConclusionNote('Constructive Dilemma detected');
@@ -914,10 +920,10 @@ export default class ArgumentCalculator {
         }
         if (
           this.detectDestructiveDilemma(
-            conclusion.truthStatements[0].statement.id,
-            conclusion.truthStatements[0].truthValue,
-            conclusion.truthStatements[1].statement.id,
-            conclusion.truthStatements[1].truthValue,
+            conclusionTruthStatementFirstId,
+            conclusionTruthStatementFirstTruthValue,
+            conclusionTruthStatementSecondId,
+            conclusionTruthStatementSecondTruthValue,
           )
         ) {
           this.addConclusionNote('Destructive Dilemma detected');
@@ -925,13 +931,26 @@ export default class ArgumentCalculator {
         }
         if (
           this.detectBidirectionalDilemma(
-            conclusion.truthStatements[0].statement.id,
-            conclusion.truthStatements[0].truthValue,
-            conclusion.truthStatements[1].statement.id,
-            conclusion.truthStatements[1].truthValue,
+            conclusionTruthStatementFirstId,
+            conclusionTruthStatementFirstTruthValue,
+            conclusionTruthStatementSecondId,
+            conclusionTruthStatementSecondTruthValue,
           )
         ) {
           this.addConclusionNote('Bidirectional Dilemma detected');
+          break;
+        }
+        if (
+          (conclusionTruthStatementFirstTruthValue &&
+            this.isInTrueStatements(conclusionTruthStatementFirst.statement)) ||
+          (!conclusionTruthStatementFirstTruthValue &&
+            this.isInFalseStatements(conclusionTruthStatementFirst.statement)) ||
+          (conclusionTruthStatementSecondTruthValue &&
+            this.isInTrueStatements(conclusionTruthStatementSecond.statement)) ||
+          (!conclusionTruthStatementSecondTruthValue &&
+            this.isInFalseStatements(conclusionTruthStatementSecond.statement))
+        ) {
+          this.addConclusionNote('One or more truth statements in OR are true');
           break;
         }
         this.addInvalidConclusionError(
