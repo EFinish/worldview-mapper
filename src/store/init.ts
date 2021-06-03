@@ -109,113 +109,20 @@ export default function initStoreForTesting(context) {
       context.getters.getPremiseFromStackById(5),
     ],
   });
-  // context.commit('ADD_TO_PREMISE_STACK', {
-  //   type: premiseTypes.premiseTypeIfThen,
-  //   statements: [
-  //     context.getters.getStatementFromStackById(0),
-  //     context.getters.getStatementFromStackById(1),
-  //   ],
-  // } as Premise);
-  // context.commit('ADD_TO_PREMISE_STACK', {
-  //   type: premiseTypes.premiseTypeTrue,
-  //   statements: [context.getters.getStatementFromStackById(0)],
-  // } as Premise);
-  // context.commit('ADD_TO_PREMISE_STACK', {
-  //   type: premiseTypes.premiseTypeTrue,
-  //   statements: [context.getters.getStatementFromStackById(1)],
-  // } as Premise);
-  // context.commit('ADD_TO_PREMISE_STACK', {
-  //   type: premiseTypes.premiseTypeFalse,
-  //   statements: [context.getters.getStatementFromStackById(0)],
-  // } as Premise);
-  // context.commit('ADD_TO_PREMISE_STACK', {
-  //   type: premiseTypes.premiseTypeFalse,
-  //   statements: [context.getters.getStatementFromStackById(1)],
-  // } as Premise);
-  // context.commit('ADD_TO_PREMISE_STACK', {
-  //   type: premiseTypes.premiseTypeOr,
-  //   statements: [
-  //     context.getters.getStatementFromStackById(0),
-  //     context.getters.getStatementFromStackById(1),
-  //   ],
-  // } as Premise);
-  // context.commit('ADD_TO_PREMISE_STACK', {
-  //   type: premiseTypes.premiseTypeNor,
-  //   statements: [
-  //     context.getters.getStatementFromStackById(0),
-  //     context.getters.getStatementFromStackById(1),
-  //   ],
-  // } as Premise);
-  // context.commit('ADD_TO_PREMISE_STACK', {
-  //   type: premiseTypes.premiseTypeXor,
-  //   statements: [
-  //     context.getters.getStatementFromStackById(0),
-  //     context.getters.getStatementFromStackById(1),
-  //   ],
-  // } as Premise);
-  // context.commit('ADD_TO_PREMISE_STACK', {
-  //   type: premiseTypes.premiseTypeXnor,
-  //   statements: [
-  //     context.getters.getStatementFromStackById(0),
-  //     context.getters.getStatementFromStackById(1),
-  //   ],
-  // } as Premise);
-  // context.commit('ADD_TO_PREMISE_STACK', {
-  //   type: premiseTypes.premiseTypeAnd,
-  //   statements: [
-  //     context.getters.getStatementFromStackById(0),
-  //     context.getters.getStatementFromStackById(1),
-  //   ],
-  // } as Premise);
-  // context.commit('ADD_TO_PREMISE_STACK', {
-  //   type: premiseTypes.premiseTypeNand,
-  //   statements: [
-  //     context.getters.getStatementFromStackById(0),
-  //     context.getters.getStatementFromStackById(1),
-  //   ],
-  // } as Premise);
-  // context.commit('ADD_TO_PREMISE_STACK', {
-  //   type: premiseTypes.premiseTypeIfThen,
-  //   statements: [
-  //     context.getters.getStatementFromStackById(1),
-  //     context.getters.getStatementFromStackById(2),
-  //   ],
-  // } as Premise);
-  // context.commit('ADD_TO_PREMISE_STACK', {
-  //   type: premiseTypes.premiseTypeIfThen,
-  //   statements: [
-  //     context.getters.getStatementFromStackById(0),
-  //     context.getters.getStatementFromStackById(2),
-  //   ],
-  // } as Premise);
-  // context.commit('ADD_TO_PREMISE_STACK', {
-  //   type: premiseTypes.premiseTypeIfThen,
-  //   statements: [
-  //     context.getters.getStatementFromStackById(2),
-  //     context.getters.getStatementFromStackById(3),
-  //   ],
-  // } as Premise);
-  // context.commit('ADD_TO_PREMISE_STACK', {
-  //   type: premiseTypes.premiseTypeIfThen,
-  //   statements: [
-  //     context.getters.getStatementFromStackById(0),
-  //     context.getters.getStatementFromStackById(3),
-  //   ],
-  // } as Premise);
-  // context.commit('ADD_TO_PREMISE_STACK', {
-  //   type: premiseTypes.premiseTypeOr,
-  //   statements: [
-  //     context.getters.getStatementFromStackById(0),
-  //     context.getters.getStatementFromStackById(2),
-  //   ],
-  // } as Premise);
-  // context.commit('ADD_TO_PREMISE_STACK', {
-  //   type: premiseTypes.premiseTypeOr,
-  //   statements: [
-  //     context.getters.getStatementFromStackById(1),
-  //     context.getters.getStatementFromStackById(3),
-  //   ],
-  // } as Premise);
+  context.commit('ADD_PROPOSITION_TO_PREMISE_STACK', {
+    type: propositionTypes.Or,
+    truthStatements: [
+      context.getters.getPremiseFromStackById(0),
+      context.getters.getPremiseFromStackById(7),
+    ],
+  });
+  context.commit('ADD_PROPOSITION_TO_PREMISE_STACK', {
+    type: propositionTypes.Or,
+    truthStatements: [
+      context.getters.getPremiseFromStackById(2),
+      context.getters.getPremiseFromStackById(5),
+    ],
+  });
   // ARGUMENTS
   context.commit('ADD_TO_ARGUMENT_STACK', {
     premises: [
@@ -269,183 +176,19 @@ export default function initStoreForTesting(context) {
   });
   context.commit('ADD_TO_ARGUMENT_STACK', {
     premises: [
+      context.getters.getPremiseFromStackById(8),
+      context.getters.getPremiseFromStackById(11),
+      context.getters.getPremiseFromStackById(17),
+    ],
+    conclusion: context.getters.getPremiseFromStackById(18),
+    title: 'Bidirectional Dilemma (p -> q) ^ (r -> s) ^ (p V !s) = (q V !r)',
+  });
+  context.commit('ADD_TO_ARGUMENT_STACK', {
+    premises: [
       context.getters.getPremiseFromStackById(0),
       context.getters.getPremiseFromStackById(2),
     ],
     conclusion: context.getters.getPremiseFromStackById(0),
     title: 'Simplification p ^ q = 1',
   });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'invalid untrue, x + !x = !x',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(1),
-  //     context.getters.getPremiseFromStackById(3),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(3),
-  // });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'valid true OR',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(5),
-  //     context.getters.getPremiseFromStackById(2),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(2),
-  // });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'valid untrue OR',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(3),
-  //     context.getters.getPremiseFromStackById(4),
-  //     context.getters.getPremiseFromStackById(5),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(4),
-  // });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'valid true NOR',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(6),
-  //     context.getters.getPremiseFromStackById(3),
-  //     context.getters.getPremiseFromStackById(4),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(4),
-  // });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'valid untrue NOR',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(6),
-  //     context.getters.getPremiseFromStackById(1),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(1),
-  // });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'valid true XOR x',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(7),
-  //     context.getters.getPremiseFromStackById(1),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(1),
-  // });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'valid true XOR x + !y',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(7),
-  //     context.getters.getPremiseFromStackById(1),
-  //     context.getters.getPremiseFromStackById(4),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(1),
-  // });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'valid untrue XOR x + y',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(7),
-  //     context.getters.getPremiseFromStackById(1),
-  //     context.getters.getPremiseFromStackById(2),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(1),
-  // });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'valid untrue XOR !x + !y',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(7),
-  //     context.getters.getPremiseFromStackById(3),
-  //     context.getters.getPremiseFromStackById(4),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(3),
-  // });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'valid true XNOR x + y',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(8),
-  //     context.getters.getPremiseFromStackById(1),
-  //     context.getters.getPremiseFromStackById(2),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(1),
-  // });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'valid true XNOR !x + !y',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(8),
-  //     context.getters.getPremiseFromStackById(3),
-  //     context.getters.getPremiseFromStackById(4),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(3),
-  // });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'valid untrue XNOR x',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(8),
-  //     context.getters.getPremiseFromStackById(1),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(1),
-  // });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'valid untrue XNOR x + !y',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(8),
-  //     context.getters.getPremiseFromStackById(1),
-  //     context.getters.getPremiseFromStackById(4),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(1),
-  // });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'valid true x AND y',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(9),
-  //     context.getters.getPremiseFromStackById(1),
-  //     context.getters.getPremiseFromStackById(2),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(1),
-  // });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'valid untrue x AND',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(9),
-  //     context.getters.getPremiseFromStackById(1),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(1),
-  // });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'valid untrue !x AND y',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(9),
-  //     context.getters.getPremiseFromStackById(3),
-  //     context.getters.getPremiseFromStackById(2),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(3),
-  // });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'valid untrue !x AND !y',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(9),
-  //     context.getters.getPremiseFromStackById(3),
-  //     context.getters.getPremiseFromStackById(4),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(3),
-  // });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'valid true x NAND y',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(10),
-  //     context.getters.getPremiseFromStackById(1),
-  //     context.getters.getPremiseFromStackById(4),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(1),
-  // });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'valid true x NAND',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(10),
-  //     context.getters.getPremiseFromStackById(1),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(1),
-  // });
-  // context.commit('ADD_TO_ARGUMENT_STACK', {
-  //   title: 'valid untrue x NAND y',
-  //   premises: [
-  //     context.getters.getPremiseFromStackById(10),
-  //     context.getters.getPremiseFromStackById(1),
-  //     context.getters.getPremiseFromStackById(2),
-  //   ],
-  //   conclusion: context.getters.getPremiseFromStackById(1),
-  // });
 }

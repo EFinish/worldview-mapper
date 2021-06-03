@@ -571,6 +571,9 @@ export default class ArgumentCalculator {
     statementSecondId: number,
     statementSecondTruthValue: boolean,
   ): boolean {
+    if (statementFirstTruthValue !== statementSecondTruthValue) {
+      return false;
+    }
     // 1. find (p -> q) and (r -> s) to fit conclusion (q V s)
     const ifThenPremises = this.getPropositionsByPropositionTypeId(PropositionTypes.IfThen.id);
     const validIfThenFirsts = ifThenPremises.filter(
@@ -637,9 +640,6 @@ export default class ArgumentCalculator {
     return false;
   }
 
-  // CONSTRUCTIVE
-  // (p -> q) ^ (r -> s) ^ (p V r) = (q V s)
-
   // (p -> q) ^ (r -> s) ^ (!q V !s) = (!p V !r)
   private detectDestructiveDilemma(
     statementFirstId: number,
@@ -647,6 +647,9 @@ export default class ArgumentCalculator {
     statementSecondId: number,
     statementSecondTruthValue: boolean,
   ): boolean {
+    if (statementFirstTruthValue !== statementSecondTruthValue) {
+      return false;
+    }
     // 1. find (p -> q) and (r -> s) to fit conclusion (!p V !r)
     const ifThenPremises = this.getPropositionsByPropositionTypeId(PropositionTypes.IfThen.id);
     const validIfThenFirsts = ifThenPremises.filter(
@@ -697,7 +700,84 @@ export default class ArgumentCalculator {
               second.truthStatements[1].truthValue === !or.truthStatements[0].truthValue,
           );
           if (foundNotQ) {
-            return false;
+            return true;
+          }
+        }
+        return false;
+      });
+      if (found) {
+        return true;
+      }
+      return false;
+    });
+    if (validOrPremise) {
+      return true;
+    }
+    return false;
+  }
+
+  // (p -> q) ^ (r -> s) ^ (p V !s) = (q V !r)
+  private detectBidirectionalDilemma(
+    statementFirstId: number,
+    statementFirstTruthValue: boolean,
+    statementSecondId: number,
+    statementSecondTruthValue: boolean,
+  ): boolean {
+    if (statementFirstTruthValue === statementSecondTruthValue) {
+      return false;
+    }
+
+    // 1. find (p -> q) and (r -> s) to fit conclusion (q V !r)
+    const ifThenPremises = this.getPropositionsByPropositionTypeId(PropositionTypes.IfThen.id);
+    const validIfThenFirsts = ifThenPremises.filter(
+      (premise: Proposition) =>
+        // eslint-disable-next-line implicit-arrow-linebreak
+        premise.truthStatements[1].statement.id === statementFirstId &&
+        premise.truthStatements[1].truthValue === statementFirstTruthValue,
+    );
+    const validIfThenSeconds = ifThenPremises.filter(
+      (premise: Proposition) =>
+        // eslint-disable-next-line implicit-arrow-linebreak
+        premise.truthStatements[0].statement.id === statementSecondId &&
+        premise.truthStatements[0].truthValue !== statementSecondTruthValue,
+    );
+
+    if (validIfThenFirsts.length === 0 || validIfThenSeconds.length === 0) {
+      return false;
+    }
+
+    // 2. assuming conclusion is (q V !r), find a possible (p V !s) to fit (p -> q) ^ (r -> s)
+    const orPremises = this.getPropositionsByPropositionTypeId(PropositionTypes.Or.id);
+    const validOrPremise = orPremises.find((or: Proposition) => {
+      // find (p -> q) for an or where (p V !s)
+      const found = validIfThenFirsts.find((first: Proposition) => {
+        if (
+          first.truthStatements[0].statement.id === or.truthStatements[0].statement.id &&
+          first.truthStatements[0].truthValue === or.truthStatements[0].truthValue
+        ) {
+          // found p for (p V ?)
+          const foundNotS = validIfThenSeconds.find(
+            (second: Proposition) =>
+              // eslint-disable-next-line implicit-arrow-linebreak
+              second.truthStatements[1].statement.id === or.truthStatements[1].statement.id &&
+              second.truthStatements[1].truthValue !== or.truthStatements[1].truthValue,
+          );
+          if (foundNotS) {
+            return true;
+          }
+        } else if (
+          first.truthStatements[0].statement.id === or.truthStatements[1].statement.id &&
+          first.truthStatements[0].truthValue !== or.truthStatements[1].truthValue
+        ) {
+          // found r for (? V !s)
+          const foundP = validIfThenSeconds.find(
+            (second: Proposition) =>
+              // eslint-disable-next-line implicit-arrow-linebreak
+              second.truthStatements[0].statement.id === or.truthStatements[0].statement.id &&
+              second.truthStatements[0].truthValue === or.truthStatements[0].truthValue,
+          );
+          if (foundP) {
+            return true;
           }
         }
         return false;
@@ -843,8 +923,19 @@ export default class ArgumentCalculator {
           this.addConclusionNote('Destructive Dilemma detected');
           break;
         }
+        if (
+          this.detectBidirectionalDilemma(
+            conclusion.truthStatements[0].statement.id,
+            conclusion.truthStatements[0].truthValue,
+            conclusion.truthStatements[1].statement.id,
+            conclusion.truthStatements[1].truthValue,
+          )
+        ) {
+          this.addConclusionNote('Bidirectional Dilemma detected');
+          break;
+        }
         this.addInvalidConclusionError(
-          'Invalid conclusion: neither exact condition, nor constructive dilemma, nor destructive dilemma found',
+          'Invalid conclusion: neither exact condition, nor constructive dilemma, nor destructive dilemma, nor bidirectional dilemma found',
         );
         break;
       default:
