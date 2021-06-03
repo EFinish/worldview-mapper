@@ -370,10 +370,25 @@ export default class ArgumentCalculator {
         const statementSecondTruthProduct: boolean = truthStatementSecond.truthValue
           ? this.isInTrueStatements(truthStatementSecond.statement)
           : this.isInFalseStatements(truthStatementSecond.statement);
+        // product is set when the statement is either in true or false statements
+        // product is not set when statement is in neither
+        const statementFirstTruthProductIsSet =
+          this.isInTrueStatements(truthStatementFirst.statement) ||
+          this.isInFalseStatements(truthStatementFirst.statement);
+        const statementSecondTruthProductIsSet =
+          this.isInTrueStatements(truthStatementSecond.statement) ||
+          this.isInFalseStatements(truthStatementSecond.statement);
 
         switch (premise.type.id) {
           // x OR y
           case PropositionTypes.Or.id:
+            if (!statementFirstTruthProductIsSet || !statementSecondTruthProductIsSet) {
+              this.addPremiseNote(
+                premise,
+                'One or more statements did not have a truth product set',
+              );
+              break;
+            }
             // if !x and !y create error
             if (!statementFirstTruthProduct && !statementSecondTruthProduct) {
               this.addInvalidPremiseError(
@@ -960,5 +975,9 @@ export default class ArgumentCalculator {
       default:
         break;
     }
+  }
+
+  private isConclusionAProposition(): boolean {
+    return this.argument.conclusion instanceof Proposition;
   }
 }
