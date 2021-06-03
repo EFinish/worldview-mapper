@@ -267,6 +267,14 @@ export default function initStoreForTesting(context) {
     conclusion: context.getters.getPremiseFromStackById(16),
     title: 'Destructive Dilemma (p -> q) ^ (r -> s) ^ (!q V !s) = (!p V !r)',
   });
+  context.commit('ADD_TO_ARGUMENT_STACK', {
+    premises: [
+      context.getters.getPremiseFromStackById(0),
+      context.getters.getPremiseFromStackById(2),
+    ],
+    conclusion: context.getters.getPremiseFromStackById(0),
+    title: 'Simplification p ^ q = 1',
+  });
   // context.commit('ADD_TO_ARGUMENT_STACK', {
   //   title: 'invalid untrue, x + !x = !x',
   //   premises: [
