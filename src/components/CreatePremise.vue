@@ -39,8 +39,30 @@
         </b-form-group>
       </b-col>
     </b-row>
-    <b-row v-if="premiseType === 'proposition' && propositionScaffolding.type !== null">
+    <b-row v-if="premiseType === 'proposition' && propositionScaffolding.type !== undefined">
       <b-col>
+        <b-form-group
+          description="Choose a type of premise for new proposition's first premise"
+          label="Proposition 1 premise type"
+          v-slot="{ ariaDescribedby }"
+        >
+          <b-form-radio
+            v-model="propositionPremiseFirstType"
+            :aria-describedby="ariaDescribedby"
+            value="proposition"
+          >
+            Proposition
+          </b-form-radio>
+          <b-form-radio
+            v-model="propositionPremiseFirstType"
+            :aria-describedby="ariaDescribedby"
+            value="truth_statement"
+          >
+            Truth Statement
+          </b-form-radio>
+        </b-form-group>
+      </b-col>
+      <b-col v-if="propositionPremiseFirstType === 'truth_statement'">
         <b-form-group
           :description="`Select truth statement 1 new proposition`"
           :label="`Truth Statement 1`"
@@ -48,12 +70,49 @@
         >
           <b-form-select
             :id="`propositionTruthStatementOne`"
-            v-model="propositionScaffolding.truthStatements[0]"
+            v-model="propositionScaffolding.premises[0]"
             :options="propositionTruthStatementOptions"
-          ></b-form-select>
+          />
         </b-form-group>
       </b-col>
+      <b-col v-if="propositionPremiseFirstType === 'proposition'">
+        <b-form-group
+          :description="`Select proposition 1 new proposition`"
+          :label="`Proposition 1`"
+          :label-for="`propositionPropositionOne`"
+        >
+          <b-form-select
+            :id="`propositionPropositionOne`"
+            v-model="propositionScaffolding.premises[0]"
+            :options="propositionPropositionOptions"
+          />
+        </b-form-group>
+      </b-col>
+    </b-row>
+    <b-row v-if="premiseType === 'proposition' && propositionScaffolding.type !== undefined">
       <b-col>
+        <b-form-group
+          description="Choose a type of premise for new proposition's second premise"
+          label="Proposition 2 premise type"
+          v-slot="{ ariaDescribedby }"
+        >
+          <b-form-radio
+            v-model="propositionPremiseSecondType"
+            :aria-describedby="ariaDescribedby"
+            value="proposition"
+          >
+            Proposition
+          </b-form-radio>
+          <b-form-radio
+            v-model="propositionPremiseSecondType"
+            :aria-describedby="ariaDescribedby"
+            value="truth_statement"
+          >
+            Truth Statement
+          </b-form-radio>
+        </b-form-group>
+      </b-col>
+      <b-col v-if="propositionPremiseSecondType === 'truth_statement'">
         <b-form-group
           :description="`Select truth statement 2 new proposition`"
           :label="`Truth Statement 2`"
@@ -61,9 +120,22 @@
         >
           <b-form-select
             :id="`propositionTruthStatementTwo`"
-            v-model="propositionScaffolding.truthStatements[1]"
+            v-model="propositionScaffolding.premises[1]"
             :options="propositionTruthStatementOptions"
           ></b-form-select>
+        </b-form-group>
+      </b-col>
+      <b-col v-if="propositionPremiseSecondType === 'proposition'">
+        <b-form-group
+          :description="`Select proposition 2 new proposition`"
+          :label="`Proposition 2`"
+          :label-for="`propositionPropositionTwo`"
+        >
+          <b-form-select
+            :id="`propositionPropositionTwo`"
+            v-model="propositionScaffolding.premises[1]"
+            :options="propositionPropositionOptions"
+          />
         </b-form-group>
       </b-col>
     </b-row>
@@ -102,7 +174,7 @@
         </b-form-group>
       </b-col>
     </b-row>
-    {{ premisePreview }}
+    <PremiseLabel :premise="potentialPremise" :colored="true" />
     <b-row v-if="showSubmit">
       <b-col>
         <b-button variant="success" v-on:click="submit">Create</b-button>
@@ -123,26 +195,36 @@ import Proposition from '@/models/Proposition';
 import TruthStatement from '@/models/TruthStatement';
 import { PropositionType } from '@/models/interfaces/PropositionType';
 
+import PremiseLabel from '@/components/PremiseLabel.vue';
+
 interface SelectOption {
   value: any;
   text: string;
 }
 interface PropositionScaffolding {
   type?: PropositionType;
-  truthStatements: TruthStatement[];
+  premises: Premise[];
 }
 interface TruthStatementScaffolding {
   statement?: Statement;
   truthValue: boolean;
 }
 
-@Component
+@Component({
+  components: {
+    PremiseLabel,
+  },
+})
 export default class CreatePremise extends Vue {
   premiseType = '';
 
+  propositionPremiseFirstType = '';
+
+  propositionPremiseSecondType = '';
+
   propositionScaffolding: PropositionScaffolding = {
     type: undefined,
-    truthStatements: [],
+    premises: [],
   };
 
   truthStatementScaffolding: TruthStatementScaffolding = {
@@ -179,26 +261,26 @@ export default class CreatePremise extends Vue {
   }
 
   get premisePreview(): string {
+    return this.getPremisePreview(this.potentialPremise);
+  }
+
+  get potentialPremise(): Premise {
     if (this.premiseType === 'truth_statement' && this.truthStatementScaffolding.statement) {
-      return this.getPremisePreview(
-        new TruthStatement(
-          0,
-          this.truthStatementScaffolding.statement,
-          this.truthStatementScaffolding.truthValue,
-        ),
+      return new TruthStatement(
+        0,
+        this.truthStatementScaffolding.statement,
+        this.truthStatementScaffolding.truthValue,
       );
     }
     if (this.premiseType === 'proposition' && this.propositionScaffolding.type) {
-      return this.getPremisePreview(
-        new Proposition(
-          0,
-          this.propositionScaffolding.type,
-          this.propositionScaffolding.truthStatements,
-        ),
+      return new Proposition(
+        0,
+        this.propositionScaffolding.type,
+        this.propositionScaffolding.premises,
       );
     }
 
-    return '';
+    return {} as Premise;
   }
 
   getPremisePreview(premise: Premise): string {
@@ -214,12 +296,28 @@ export default class CreatePremise extends Vue {
     }));
   }
 
+  get propositionPropositionOptions(): SelectOption[] {
+    return this.propositionsFromPremiseStack.map((proposition: Proposition) => ({
+      // eslint-disable-next-line indent
+      value: proposition,
+      text: this.getPremisePreview(proposition),
+    }));
+  }
+
   get truthStatementsFromPremiseStack(): TruthStatement[] {
     const truthStatements: TruthStatement[] = this.premiseStack.filter(
       (premise) => premise instanceof TruthStatement,
     );
 
     return truthStatements;
+  }
+
+  get propositionsFromPremiseStack(): Proposition[] {
+    const propositions: Proposition[] = this.premiseStack.filter(
+      (premise) => premise instanceof Proposition,
+    );
+
+    return propositions;
   }
 
   get truthStatementStatementOptions(): SelectOption[] {
@@ -236,8 +334,8 @@ export default class CreatePremise extends Vue {
       // eslint-disable-next-line operator-linebreak
       this.propositionScaffolding.type &&
       // eslint-disable-next-line operator-linebreak
-      this.propositionScaffolding.truthStatements[0] &&
-      this.propositionScaffolding.truthStatements[1]
+      this.propositionScaffolding.premises[0] &&
+      this.propositionScaffolding.premises[1]
     ) {
       return true;
     }

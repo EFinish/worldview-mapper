@@ -29,13 +29,8 @@ export default new Vuex.Store({
         new TruthStatement(state.premiseStack.length, args.statement, args.truthValue),
       );
     },
-    ADD_PROPOSITION_TO_PREMISE_STACK(
-      state,
-      args: { type: PropositionType; truthStatements: TruthStatement[] },
-    ) {
-      state.premiseStack.push(
-        new Proposition(state.premiseStack.length, args.type, args.truthStatements),
-      );
+    ADD_PROPOSITION_TO_PREMISE_STACK(state, args: { type: PropositionType; premises: Premise[] }) {
+      state.premiseStack.push(new Proposition(state.premiseStack.length, args.type, args.premises));
     },
     ADD_TO_ARGUMENT_STACK(
       state,

@@ -30,10 +30,10 @@
       <b-col>
         <b-list-group>
           <b-list-group-item v-for="(premise, index) in argumentScaffolding.premises" :key="index">
-            {{ index + 1 }}.) {{ getFilledLabel(premise) }}
+            {{ index + 1 }}.) <PremiseLabel :premise="premise" :colored="true" />
           </b-list-group-item>
           <b-list-group-item v-if="argumentScaffolding.conclusion">
-            C: {{ getFilledLabel(argumentScaffolding.conclusion) }}
+            C: <PremiseLabel :premise="argumentScaffolding.conclusion" :colored="true" />
           </b-list-group-item>
         </b-list-group>
       </b-col>
@@ -61,6 +61,8 @@ import { Action, State } from 'vuex-class';
 import { Premise } from '@/models/interfaces/Premise';
 import PremiseUtil from '@/utils/premise';
 
+import PremiseLabel from '@/components/PremiseLabel.vue';
+
 interface ArgumentScaffolding {
   premises: Premise[];
   conclusion?: Premise;
@@ -72,7 +74,11 @@ interface SelectOption {
   text: string;
 }
 
-@Component
+@Component({
+  components: {
+    PremiseLabel,
+  },
+})
 export default class CreateArgument extends Vue {
   argumentScaffolding: ArgumentScaffolding = {
     premises: [],

@@ -11,12 +11,20 @@ const PremiseUtil = (() => {
     }
     if (premise instanceof Proposition) {
       let response = premise.type.label;
-      response = premise.truthStatements[0]
-        ? response.replace('p', getFilledLabel(premise.truthStatements[0]))
-        : response;
-      response = premise.truthStatements[1]
-        ? response.replace('q', getFilledLabel(premise.truthStatements[1]))
-        : response;
+      if (premise.premises[0]) {
+        if (premise.premises[0] instanceof TruthStatement) {
+          response = response.replace('p', getFilledLabel(premise.premises[0]));
+        } else if (premise.premises[0] instanceof Proposition) {
+          response = response.replace('p', `(${getFilledLabel(premise.premises[0])})`);
+        }
+      }
+      if (premise.premises[1]) {
+        if (premise.premises[1] instanceof TruthStatement) {
+          response = response.replace('q', getFilledLabel(premise.premises[1]));
+        } else if (premise.premises[1] instanceof Proposition) {
+          response = response.replace('q', `(${getFilledLabel(premise.premises[1])})`);
+        }
+      }
 
       return response;
     }

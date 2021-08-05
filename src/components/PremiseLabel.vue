@@ -32,26 +32,6 @@ export default class PremiseLabel extends Vue {
 
   getFilledLabel = PremiseUtil.getFilledLabel;
 
-  // get conclusionErrors() {
-  //   return this.$props.errors.filter((error: Error) => error instanceof InvalidConclusionError);
-  // }
-
-  // get conclusionNotes() {
-  //   return this.$props.notes.filter((note: Note) => note instanceof ConclusionNote);
-  // }
-
-  // getPremiseErrorsByPremiseId(premiseId: number) {
-  //   return this.$props.errors.filter(
-  //     (error: Error) => error instanceof InvalidPremiseError && error.premise.id === premiseId,
-  //   );
-  // }
-
-  // getPremiseNotesByPremiseId(premiseId: number) {
-  //   return this.$props.notes.filter(
-  //     (note: Note) => note instanceof PremiseNote && note.premise.id === premiseId,
-  //   );
-  // }
-
   getTruthStatementColored(premise: TruthStatement): string {
     console.log(this.premise);
 
@@ -66,12 +46,20 @@ export default class PremiseLabel extends Vue {
   getPropositionColored(premise: Proposition) {
     console.log(this.premise);
     let response = premise.type.label;
-    response = premise.truthStatements[0]
-      ? response.replace('p', this.getTruthStatementColored(premise.truthStatements[0]))
-      : response;
-    response = premise.truthStatements[1]
-      ? response.replace('q', this.getTruthStatementColored(premise.truthStatements[1]))
-      : response;
+    if (premise.premises[0]) {
+      if (premise.premises[0] instanceof TruthStatement) {
+        response = response.replace('p', this.getTruthStatementColored(premise.premises[0]));
+      } else if (premise.premises[0] instanceof Proposition) {
+        response = response.replace('p', `(${this.getPropositionColored(premise.premises[0])})`);
+      }
+    }
+    if (premise.premises[1]) {
+      if (premise.premises[1] instanceof TruthStatement) {
+        response = response.replace('q', this.getTruthStatementColored(premise.premises[1]));
+      } else if (premise.premises[1] instanceof Proposition) {
+        response = response.replace('q', `(${this.getPropositionColored(premise.premises[1])})`);
+      }
+    }
 
     return response;
   }

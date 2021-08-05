@@ -48,84 +48,84 @@ export default function initStoreForTesting(context) {
   // PROPOSITIONS
   context.commit('ADD_PROPOSITION_TO_PREMISE_STACK', {
     type: propositionTypes.IfThen,
-    truthStatements: [
+    premises: [
       context.getters.getPremiseFromStackById(0),
       context.getters.getPremiseFromStackById(2),
     ],
   });
   context.commit('ADD_PROPOSITION_TO_PREMISE_STACK', {
     type: propositionTypes.IfThen,
-    truthStatements: [
+    premises: [
       context.getters.getPremiseFromStackById(2),
       context.getters.getPremiseFromStackById(4),
     ],
   });
   context.commit('ADD_PROPOSITION_TO_PREMISE_STACK', {
     type: propositionTypes.IfThen,
-    truthStatements: [
+    premises: [
       context.getters.getPremiseFromStackById(0),
       context.getters.getPremiseFromStackById(4),
     ],
   });
   context.commit('ADD_PROPOSITION_TO_PREMISE_STACK', {
     type: propositionTypes.IfThen,
-    truthStatements: [
+    premises: [
       context.getters.getPremiseFromStackById(4),
       context.getters.getPremiseFromStackById(6),
     ],
   });
   context.commit('ADD_PROPOSITION_TO_PREMISE_STACK', {
     type: propositionTypes.Xor,
-    truthStatements: [
+    premises: [
       context.getters.getPremiseFromStackById(0),
       context.getters.getPremiseFromStackById(2),
     ],
   });
   context.commit('ADD_PROPOSITION_TO_PREMISE_STACK', {
     type: propositionTypes.Or,
-    truthStatements: [
+    premises: [
       context.getters.getPremiseFromStackById(0),
       context.getters.getPremiseFromStackById(4),
     ],
   });
   context.commit('ADD_PROPOSITION_TO_PREMISE_STACK', {
     type: propositionTypes.Or,
-    truthStatements: [
+    premises: [
       context.getters.getPremiseFromStackById(2),
       context.getters.getPremiseFromStackById(6),
     ],
   });
   context.commit('ADD_PROPOSITION_TO_PREMISE_STACK', {
     type: propositionTypes.Or,
-    truthStatements: [
+    premises: [
       context.getters.getPremiseFromStackById(3),
       context.getters.getPremiseFromStackById(7),
     ],
   });
   context.commit('ADD_PROPOSITION_TO_PREMISE_STACK', {
     type: propositionTypes.Or,
-    truthStatements: [
+    premises: [
       context.getters.getPremiseFromStackById(1),
       context.getters.getPremiseFromStackById(5),
     ],
   });
   context.commit('ADD_PROPOSITION_TO_PREMISE_STACK', {
     type: propositionTypes.Or,
-    truthStatements: [
+    premises: [
       context.getters.getPremiseFromStackById(0),
       context.getters.getPremiseFromStackById(7),
     ],
   });
   context.commit('ADD_PROPOSITION_TO_PREMISE_STACK', {
     type: propositionTypes.Or,
-    truthStatements: [
+    premises: [
       context.getters.getPremiseFromStackById(2),
       context.getters.getPremiseFromStackById(5),
     ],
   });
   context.commit('ADD_PROPOSITION_TO_PREMISE_STACK', {
     type: propositionTypes.And,
-    truthStatements: [
+    premises: [
       context.getters.getPremiseFromStackById(0),
       context.getters.getPremiseFromStackById(2),
     ],

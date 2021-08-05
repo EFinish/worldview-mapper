@@ -19,7 +19,7 @@
             </b-button>
             <b-list-group v-if="showPremiseStack">
               <b-list-group-item v-for="premise in premiseStack" :key="premise.id">
-                {{ premise.id }}.) {{ getFilledLabel(premise) }}
+                {{ premise.id }}.) <PremiseLabel :premise="premise" :colored="true" />
               </b-list-group-item>
             </b-list-group>
           </b-col>
@@ -63,6 +63,7 @@ import CreateStatement from '@/components/CreateStatement.vue';
 import CreatePremise from '@/components/CreatePremise.vue';
 import CreateArgument from '@/components/CreateArgument.vue';
 import ListArgument from '@/components/ListArgument.vue';
+import PremiseLabel from '@/components/PremiseLabel.vue';
 import { State } from 'vuex-class';
 
 import PremiseUtil from '@/utils/premise';
@@ -75,6 +76,7 @@ import { Premise } from '@/models/interfaces/Premise';
     CreateStatement,
     CreatePremise,
     CreateArgument,
+    PremiseLabel,
     ListArgument,
   },
 })

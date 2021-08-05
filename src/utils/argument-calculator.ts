@@ -1,3 +1,5 @@
+/* eslint-disable class-methods-use-this */
+/* eslint-disable max-len */
 /* eslint-disable operator-linebreak */
 import InvalidPremiseError from '@/utils/errors/InvalidPremiseError';
 import Argument from '@/models/Argument';
@@ -5,6 +7,7 @@ import Statement from '@/models/Statement';
 import { Premise } from '@/models/interfaces/Premise';
 import TruthStatement from '@/models/TruthStatement';
 import Proposition from '@/models/Proposition';
+import PremiseUtil from '@/utils/premise';
 import { Note } from './notes/Note';
 import { PropositionTypes } from './constants';
 import InvalidConclusionError from './errors/InvalidConclusionError';
@@ -57,7 +60,7 @@ export default class ArgumentCalculator {
   async processArgument() {
     this.resetCalc();
     await this.processTruthStatements();
-    await this.processProposition();
+    await this.processPropositions();
     await this.processConclusion();
     await this.postProcessPropositions();
   }
@@ -98,7 +101,7 @@ export default class ArgumentCalculator {
     return false;
   }
 
-  private removePremiseFromProcessing(premiseIndexes: number[]): void {
+  private removePremisesFromProcessing(premiseIndexes: number[]): void {
     premiseIndexes.forEach((value) => {
       delete this.premisesToProcess[value];
     });
@@ -108,6 +111,10 @@ export default class ArgumentCalculator {
         this.premisesToProcess.splice(index, 1);
       }
     });
+  }
+
+  private removeThisPremiseFromProcessing(premiseIndex: number): void {
+    delete this.premisesToProcess[premiseIndex];
   }
 
   private addPremiseToPostProcessing(premise: Premise): void {
@@ -160,7 +167,7 @@ export default class ArgumentCalculator {
       }
     });
 
-    this.removePremiseFromProcessing(premiseIndexesToRemove);
+    this.removePremisesFromProcessing(premiseIndexesToRemove);
   }
 
   private findPropositionInArgument(
@@ -170,23 +177,25 @@ export default class ArgumentCalculator {
     statementSecondId: number,
     statementSecondTruthValue: boolean,
   ): Premise | undefined {
-    return this.argument.premises.find((premise) => {
-      if (premise instanceof Proposition && premise.type.id === propositionTypeId) {
-        const truthStatementOne: TruthStatement = premise.truthStatements[0];
-        const truthStatementTwo: TruthStatement = premise.truthStatements[1];
+    // return this.argument.premises.find((premise) => {
+    //   if (premise instanceof Proposition && premise.type.id === propositionTypeId) {
+    //     const truthStatementOne: TruthStatement = premise.truthStatements[0];
+    //     const truthStatementTwo: TruthStatement = premise.truthStatements[1];
 
-        if (
-          truthStatementOne.statement.id === statementFirstId &&
-          truthStatementOne.truthValue === statementFirstTruthValue &&
-          truthStatementTwo.statement.id === statementSecondId &&
-          truthStatementTwo.truthValue === statementSecondTruthValue
-        ) {
-          return true;
-        }
-      }
+    //     if (
+    //       truthStatementOne.statement.id === statementFirstId &&
+    //       truthStatementOne.truthValue === statementFirstTruthValue &&
+    //       truthStatementTwo.statement.id === statementSecondId &&
+    //       truthStatementTwo.truthValue === statementSecondTruthValue
+    //     ) {
+    //       return true;
+    //     }
+    //   }
 
-      return false;
-    });
+    //   return false;
+    // });
+    console.log(this.argument);
+    return undefined;
   }
 
   private getPropositionsByPropositionTypeId(propositionTypeId: number): Proposition[] {
@@ -201,279 +210,673 @@ export default class ArgumentCalculator {
     return premises;
   }
 
-  private async processProposition(): Promise<void> {
+  // private processIfThen(proposition: Proposition): boolean {
+  //   return true;
+
+  //   const [premiseFirst, premiseSecond] = proposition.premises;
+
+  //   if (premiseFirst instanceof TruthStatement && premiseSecond instanceof TruthStatement) {
+  //     switch (premiseFirst.truthValue) {
+  //       case true:
+  //         // IF x
+  //         if (this.isInTrueStatements(premiseFirst.statement)) {
+  //           if (premiseSecond.truthValue) {
+  //             // THEN y
+  //             this.trueStatements.push(premiseSecond.statement);
+  //             return true;
+  //           }
+  //           // THEN !y
+  //           this.falseStatements.push(premiseSecond.statement);
+  //           return true;
+  //         }
+  //         if (premiseSecond.truthValue && this.isInFalseStatements(premiseSecond.statement)) {
+  //           // modus tollens
+  //           // x -> y ^ !y = !x
+  //           this.falseStatements.push(premiseFirst.statement);
+  //           this.addPremiseNote(
+  //             proposition,
+  //             `Modus Tollens: ${premiseFirst.statement.id} -> ${premiseSecond.statement.id} ^ ! ${premiseSecond.statement.id} = ! ${premiseFirst.id}`,
+  //           );
+  //           return true;
+  //         }
+  //         if (!premiseSecond.truthValue && this.isInTrueStatements(premiseSecond.statement)) {
+  //           // modus tollens
+  //           // x -> !y ^ y = !x
+  //           this.falseStatements.push(premiseFirst.statement);
+  //           this.addPremiseNote(
+  //             proposition,
+  //             `Modus Tollens: ${premiseFirst.statement.id} -> ! ${premiseSecond.statement.id} ^ ${premiseSecond.statement.id} = ! ${premiseFirst.id}`,
+  //           );
+  //           return true;
+  //         }
+  //         return false;
+  //       case false:
+  //         // IF !x
+  //         if (this.isInFalseStatements(premiseFirst.statement)) {
+  //           if (premiseSecond.truthValue) {
+  //             // THEN y
+  //             this.trueStatements.push(premiseSecond.statement);
+  //             return true;
+  //           }
+  //           // THEN !y
+  //           this.falseStatements.push(premiseSecond.statement);
+  //           return true;
+  //         }
+  //         if (premiseSecond.truthValue && this.isInFalseStatements(premiseSecond.statement)) {
+  //           // modus tollens
+  //           // !x -> y ^ !y = x
+  //           this.trueStatements.push(premiseFirst.statement);
+  //           this.addPremiseNote(
+  //             proposition,
+  //             `Modus Tollens: ! ${premiseFirst.statement.id} -> ${premiseSecond.statement.id} ^ ! ${premiseSecond.statement.id} = ${premiseFirst.id}`,
+  //           );
+  //           return true;
+  //         }
+  //         if (!premiseSecond.truthValue && this.isInTrueStatements(premiseSecond.statement)) {
+  //           // modus tollens
+  //           // !x -> !y ^ y = x
+  //           this.trueStatements.push(premiseFirst.statement);
+  //           this.addPremiseNote(
+  //             proposition,
+  //             `Modus Tollens: ! ${premiseFirst.statement.id} -> ! ${premiseSecond.statement.id} ^ ${premiseSecond.statement.id} = ${premiseFirst.id}`,
+  //           );
+  //           return true;
+  //         }
+  //         return false;
+  //       default:
+  //         return false;
+  //     }
+  //   } else if (premiseFirst instanceof Proposition && premiseSecond instanceof TruthStatement) {
+  //     // TODO how to check if the truth value of a proposition is true or false?
+  //   }
+  // }
+
+  // private async processProposition(proposition: Proposition): Promise<boolean> {
+  //   // const premiseFirstIsTruthStatement = premiseFirst instanceof TruthStatement;
+  //   // const premiseSecondIsTruthStatement = premiseSecond instanceof TruthStatement;
+  //   //     const statementFirstTruthProduct: boolean = truthStatementFirst.truthValue
+  //   //       ? this.isInTrueStatements(truthStatementFirst.statement)
+  //   //       : this.isInFalseStatements(truthStatementFirst.statement);
+  //   //     const statementSecondTruthProduct: boolean = truthStatementSecond.truthValue
+  //   //       ? this.isInTrueStatements(truthStatementSecond.statement)
+  //   //       : this.isInFalseStatements(truthStatementSecond.statement);
+  //   switch (proposition.type.id) {
+  //     case PropositionTypes.IfThen.id:
+  //       const processed = this.processIfThen(proposition);
+  //       //         switch (truthStatementFirst.truthValue) {
+  //       //           case true:
+  //       //             // IF x
+  //       //             if (this.isInTrueStatements(truthStatementFirst.statement)) {
+  //       //               if (truthStatementSecond.truthValue) {
+  //       //                 // THEN y
+  //       //                 this.trueStatements.push(truthStatementSecond.statement);
+  //       //                 break;
+  //       //               }
+  //       //               // THEN !y
+  //       //               this.falseStatements.push(truthStatementSecond.statement);
+  //       //               break;
+  //       //             } else if (
+  //       //               truthStatementSecond.truthValue &&
+  //       //               this.isInFalseStatements(truthStatementSecond.statement)
+  //       //             ) {
+  //       //               // modus tollens
+  //       //               // x -> y ^ !y = !x
+  //       //               this.falseStatements.push(truthStatementFirst.statement);
+  //       //               this.addPremiseNote(
+  //       //                 premise,
+  //       //                 `Modus Tollens: ${truthStatementFirst.statement.id} -> ${truthStatementSecond.statement.id} ^ ! ${truthStatementSecond.statement.id} = ! ${truthStatementFirst.id}`,
+  //       //               );
+  //       //               break;
+  //       //             } else if (
+  //       //               !truthStatementSecond.truthValue &&
+  //       //               this.isInTrueStatements(truthStatementSecond.statement)
+  //       //             ) {
+  //       //               // modus tollens
+  //       //               // x -> !y ^ y = !x
+  //       //               this.falseStatements.push(truthStatementFirst.statement);
+  //       //               this.addPremiseNote(
+  //       //                 premise,
+  //       //                 `Modus Tollens: ${truthStatementFirst.statement.id} -> ! ${truthStatementSecond.statement.id} ^ ${truthStatementSecond.statement.id} = ! ${truthStatementFirst.id}`,
+  //       //               );
+  //       //               break;
+  //       //             }
+  //       //             break;
+  //       //           case false:
+  //       //             // IF !x
+  //       //             if (this.isInFalseStatements(truthStatementFirst.statement)) {
+  //       //               if (truthStatementSecond.truthValue) {
+  //       //                 // THEN y
+  //       //                 this.trueStatements.push(truthStatementSecond.statement);
+  //       //                 break;
+  //       //               }
+  //       //               // THEN !y
+  //       //               this.falseStatements.push(truthStatementSecond.statement);
+  //       //               break;
+  //       //             } else if (
+  //       //               truthStatementSecond.truthValue &&
+  //       //               this.isInFalseStatements(truthStatementSecond.statement)
+  //       //             ) {
+  //       //               // modus tollens
+  //       //               // !x -> y ^ !y = x
+  //       //               this.trueStatements.push(truthStatementFirst.statement);
+  //       //               this.addPremiseNote(
+  //       //                 premise,
+  //       //                 `Modus Tollens: ! ${truthStatementFirst.statement.id} -> ${truthStatementSecond.statement.id} ^ ! ${truthStatementSecond.statement.id} = ${truthStatementFirst.id}`,
+  //       //               );
+  //       //               break;
+  //       //             } else if (
+  //       //               !truthStatementSecond.truthValue &&
+  //       //               this.isInTrueStatements(truthStatementSecond.statement)
+  //       //             ) {
+  //       //               // modus tollens
+  //       //               // !x -> !y ^ y = x
+  //       //               this.trueStatements.push(truthStatementFirst.statement);
+  //       //               this.addPremiseNote(
+  //       //                 premise,
+  //       //                 `Modus Tollens: ! ${truthStatementFirst.statement.id} -> ! ${truthStatementSecond.statement.id} ^ ${truthStatementSecond.statement.id} = ${truthStatementFirst.id}`,
+  //       //               );
+  //       //               break;
+  //       //             }
+  //       //             break;
+  //       //           default:
+  //       //             break;
+  //       //         }
+  //       //         break;
+  //       //       // x OR y
+  //       //       case PropositionTypes.Or.id:
+  //       //         // if !x and !y create error
+  //       //         if (!statementFirstTruthProduct && !statementSecondTruthProduct) {
+  //       //           this.addPremiseToPostProcessing(premise);
+  //       //         }
+  //       //         break;
+  //       //       // x NOR y
+  //       //       case PropositionTypes.Nor.id:
+  //       //         // both should be false, if either x or y are true then create error
+  //       //         if (statementFirstTruthProduct) {
+  //       //           this.addPremiseToPostProcessing(premise);
+  //       //         }
+  //       //         if (statementSecondTruthProduct) {
+  //       //           this.addPremiseToPostProcessing(premise);
+  //       //         }
+  //       //         break;
+  //       //       // x XOR y
+  //       //       case PropositionTypes.Xor.id:
+  //       //         // either x is true or y is true, not both true, not both false
+  //       //         if (statementFirstTruthProduct && statementSecondTruthProduct) {
+  //       //           this.addPremiseToPostProcessing(premise);
+  //       //         }
+  //       //         if (!statementFirstTruthProduct && !statementSecondTruthProduct) {
+  //       //           this.addPremiseToPostProcessing(premise);
+  //       //         }
+  //       //         break;
+  //       //       // x XNOR y
+  //       //       case PropositionTypes.Xnor.id:
+  //       //         // both true, both false = ok
+  //       //         if (
+  //       //           (statementFirstTruthProduct && !statementSecondTruthProduct) ||
+  //       //           (!statementFirstTruthProduct && statementSecondTruthProduct)
+  //       //         ) {
+  //       //           this.addPremiseToPostProcessing(premise);
+  //       //         }
+  //       //         break;
+  //       //       case PropositionTypes.Nand.id:
+  //       //         // anything but both being true = ok
+  //       //         if (statementFirstTruthProduct && statementSecondTruthProduct) {
+  //       //           this.addPremiseToPostProcessing(premise);
+  //       //         }
+  //       //         break;
+  //       //       case PropositionTypes.And.id:
+  //       //         // must both be true
+  //       //         if (!statementFirstTruthProduct) {
+  //       //           this.addPremiseToPostProcessing(premise);
+  //       //         }
+  //       //         if (!statementSecondTruthProduct) {
+  //       //           this.addPremiseToPostProcessing(premise);
+  //       //         }
+  //       break;
+  //     default:
+  //       this.addInvalidPremiseError(premise, 'False premise: Invalid premise type.');
+
+  //       return true;
+  //   }
+  // }
+
+  private isPropositionTruthProductCalculable(proposition: Proposition): boolean {
+    console.log(this.argument);
+    switch (proposition.type.id) {
+      case PropositionTypes.IfThen.id:
+        return false;
+      case PropositionTypes.Or.id:
+      case PropositionTypes.Nor.id:
+      case PropositionTypes.Xor.id:
+      case PropositionTypes.Xnor.id:
+      case PropositionTypes.And.id:
+      case PropositionTypes.Nand.id:
+        return true;
+      default:
+        console.log('ummmmm what kinda premise u got bro...');
+        return false;
+    }
+  }
+
+  private addFalsePremise(premise: Premise): void {
+    console.log(this.argument);
+    if (premise instanceof TruthStatement) {
+      // todo add truth statement's statements to opposite truth value stack
+      // example: A is true -> put A in false stack
+      // example 2: A is false -> put A in true stack
+    } else if (premise instanceof Proposition) {
+      // todo create a falsePremiseStack
+      // todo add premise to falsePremiseStack
+    }
+  }
+
+  private addTruePremise(premise: Premise): void {
+    console.log(this.argument);
+    if (premise instanceof TruthStatement) {
+      // todo add truth statement's statements to corresponding truth value stack
+      // example: A is true -> put A in true stack
+      // example 2: A is false -> put A in false stack
+    } else if (premise instanceof Proposition) {
+      // todo create a truePremiseStack
+      // todo add premise to truePremiseStack
+    }
+  }
+
+  private isPropositionTruthProductTrue(proposition: Proposition): boolean {
+    return true;
+  }
+
+  private isPropositionTruthProductFalse(proposition: Proposition): boolean {
+    return true;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/adjacent-overload-signatures
+  private processIfThen(proposition: Proposition): boolean {
+    console.log(this.argument);
+    const premiseFirst = proposition.premises[0];
+    const premiseSecond = proposition.premises[1];
+    let premiseFirstProductTrue = false;
+    let premiseFirstProductFalse = false;
+
+    if (premiseFirst instanceof TruthStatement) {
+      switch (premiseFirst.truthValue) {
+        case true:
+          // IF x
+          if (this.isInTrueStatements(premiseFirst.statement)) {
+            premiseFirstProductTrue = true;
+          } else if (this.isInFalseStatements(premiseFirst.statement)) {
+            premiseFirstProductFalse = true;
+          }
+          break;
+        case false:
+          // IF !x
+          if (this.isInFalseStatements(premiseFirst.statement)) {
+            premiseFirstProductTrue = true;
+          } else if (this.isInTrueStatements(premiseFirst.statement)) {
+            premiseFirstProductFalse = true;
+          }
+          break;
+        default:
+          console.log('wtf?');
+          break;
+      }
+    } else if (premiseFirst instanceof Proposition) {
+      if (this.isPropositionTruthProductCalculable(premiseFirst)) {
+        if (this.isPropositionTruthProductTrue(premiseFirst)) {
+          premiseFirstProductTrue = true;
+        } else if (this.isPropositionTruthProductFalse(premiseFirst)) {
+          premiseFirstProductFalse = true;
+        }
+      }
+    }
+
+    // if (!premiseFirstProductTrue && !premiseFirstProductFalse) {
+    //   // no truth value assigned, unabled to detirmine premise products and unable to process
+    //   return false;
+    // }
+
+    if (premiseSecond instanceof TruthStatement) {
+      switch (premiseSecond.truthValue) {
+        case true:
+          if (premiseFirstProductTrue) {
+            // IF x/!x THEN y
+            this.trueStatements.push(premiseSecond.statement);
+            return true;
+          }
+          if (this.isInFalseStatements(premiseSecond.statement)) {
+            // modus tollens, (x/!x) -> y ^ !y = (!x/x)
+            this.addFalsePremise(premiseSecond);
+            this.addPremiseNote(
+              proposition,
+              `Modus Tollens: ${premiseFirst.id} -> ${premiseSecond.id} ^ ! ${premiseSecond.id} = ! ${premiseFirst.id}`,
+            );
+            return true;
+          }
+          break;
+        case false:
+          if (premiseFirstProductTrue) {
+            // IF x/!x THEN !y
+            this.falseStatements.push(premiseSecond.statement);
+            return true;
+          }
+          if (this.isInTrueStatements(premiseSecond.statement)) {
+            // modus tollens, (x/!x) -> !y ^ y = (!x/x)
+            this.addFalsePremise(premiseSecond);
+            this.addPremiseNote(
+              proposition,
+              `Modus Tollens: ${premiseFirst.id} -> ! ${premiseSecond.id} ^ ${premiseSecond.id} = ! ${premiseFirst.id}`,
+            );
+            return true;
+          }
+          break;
+        default:
+          this.addInvalidPremiseError(proposition, 'False premise: Invalid premise type.');
+          return true;
+      }
+    } else if (premiseSecond instanceof Proposition) {
+      // TODO figure out what to do here
+    }
+
+    return false;
+  }
+
+  private processThisProposition(proposition: Proposition, premiseIndex: number) {
+    let processed = false;
+
+    switch (proposition.type.id) {
+      case PropositionTypes.IfThen.id:
+        processed = this.processIfThen(proposition);
+        break;
+      default:
+        break;
+    }
+
+    if (processed) {
+      this.removeThisPremiseFromProcessing(premiseIndex);
+    }
+  }
+
+  private async processPropositions(): Promise<void> {
     const premiseIndexesToRemove: number[] = [];
 
     // eslint-disable-next-line consistent-return
     this.premisesToProcess.forEach((premise, premiseIndex) => {
       if (premise instanceof Proposition) {
-        const [truthStatementFirst, truthStatementSecond] = premise.truthStatements;
-        const statementFirstTruthProduct: boolean = truthStatementFirst.truthValue
-          ? this.isInTrueStatements(truthStatementFirst.statement)
-          : this.isInFalseStatements(truthStatementFirst.statement);
-        const statementSecondTruthProduct: boolean = truthStatementSecond.truthValue
-          ? this.isInTrueStatements(truthStatementSecond.statement)
-          : this.isInFalseStatements(truthStatementSecond.statement);
-
-        switch (premise.type.id) {
-          case PropositionTypes.IfThen.id:
-            // IF x true THEN y true
-            switch (truthStatementFirst.truthValue) {
-              case true:
-                // IF x
-                if (this.isInTrueStatements(truthStatementFirst.statement)) {
-                  if (truthStatementSecond.truthValue) {
-                    // THEN y
-                    this.trueStatements.push(truthStatementSecond.statement);
-                    break;
-                  }
-                  // THEN !y
-                  this.falseStatements.push(truthStatementSecond.statement);
-                  break;
-                } else if (
-                  truthStatementSecond.truthValue &&
-                  this.isInFalseStatements(truthStatementSecond.statement)
-                ) {
-                  // modus tollens
-                  // x -> y ^ !y = !x
-                  this.falseStatements.push(truthStatementFirst.statement);
-                  this.addPremiseNote(
-                    premise,
-                    `Modus Tollens: ${truthStatementFirst.statement.id} -> ${truthStatementSecond.statement.id} ^ ! ${truthStatementSecond.statement.id} = ! ${truthStatementFirst.id}`,
-                  );
-                  break;
-                } else if (
-                  !truthStatementSecond.truthValue &&
-                  this.isInTrueStatements(truthStatementSecond.statement)
-                ) {
-                  // modus tollens
-                  // x -> !y ^ y = !x
-                  this.falseStatements.push(truthStatementFirst.statement);
-                  this.addPremiseNote(
-                    premise,
-                    `Modus Tollens: ${truthStatementFirst.statement.id} -> ! ${truthStatementSecond.statement.id} ^ ${truthStatementSecond.statement.id} = ! ${truthStatementFirst.id}`,
-                  );
-                  break;
-                }
-                break;
-              case false:
-                // IF !x
-                if (this.isInFalseStatements(truthStatementFirst.statement)) {
-                  if (truthStatementSecond.truthValue) {
-                    // THEN y
-                    this.trueStatements.push(truthStatementSecond.statement);
-                    break;
-                  }
-                  // THEN !y
-                  this.falseStatements.push(truthStatementSecond.statement);
-                  break;
-                } else if (
-                  truthStatementSecond.truthValue &&
-                  this.isInFalseStatements(truthStatementSecond.statement)
-                ) {
-                  // modus tollens
-                  // !x -> y ^ !y = x
-                  this.trueStatements.push(truthStatementFirst.statement);
-                  this.addPremiseNote(
-                    premise,
-                    `Modus Tollens: ! ${truthStatementFirst.statement.id} -> ${truthStatementSecond.statement.id} ^ ! ${truthStatementSecond.statement.id} = ${truthStatementFirst.id}`,
-                  );
-                  break;
-                } else if (
-                  !truthStatementSecond.truthValue &&
-                  this.isInTrueStatements(truthStatementSecond.statement)
-                ) {
-                  // modus tollens
-                  // !x -> !y ^ y = x
-                  this.trueStatements.push(truthStatementFirst.statement);
-                  this.addPremiseNote(
-                    premise,
-                    `Modus Tollens: ! ${truthStatementFirst.statement.id} -> ! ${truthStatementSecond.statement.id} ^ ${truthStatementSecond.statement.id} = ${truthStatementFirst.id}`,
-                  );
-                  break;
-                }
-                break;
-              default:
-                break;
-            }
-            break;
-          // x OR y
-          case PropositionTypes.Or.id:
-            // if !x and !y create error
-            if (!statementFirstTruthProduct && !statementSecondTruthProduct) {
-              this.addPremiseToPostProcessing(premise);
-            }
-            break;
-          // x NOR y
-          case PropositionTypes.Nor.id:
-            // both should be false, if either x or y are true then create error
-            if (statementFirstTruthProduct) {
-              this.addPremiseToPostProcessing(premise);
-            }
-            if (statementSecondTruthProduct) {
-              this.addPremiseToPostProcessing(premise);
-            }
-            break;
-          // x XOR y
-          case PropositionTypes.Xor.id:
-            // either x is true or y is true, not both true, not both false
-            if (statementFirstTruthProduct && statementSecondTruthProduct) {
-              this.addPremiseToPostProcessing(premise);
-            }
-            if (!statementFirstTruthProduct && !statementSecondTruthProduct) {
-              this.addPremiseToPostProcessing(premise);
-            }
-            break;
-          // x XNOR y
-          case PropositionTypes.Xnor.id:
-            // both true, both false = ok
-            if (
-              (statementFirstTruthProduct && !statementSecondTruthProduct) ||
-              (!statementFirstTruthProduct && statementSecondTruthProduct)
-            ) {
-              this.addPremiseToPostProcessing(premise);
-            }
-            break;
-          case PropositionTypes.Nand.id:
-            // anything but both being true = ok
-            if (statementFirstTruthProduct && statementSecondTruthProduct) {
-              this.addPremiseToPostProcessing(premise);
-            }
-            break;
-          case PropositionTypes.And.id:
-            // must both be true
-            if (!statementFirstTruthProduct) {
-              this.addPremiseToPostProcessing(premise);
-            }
-            if (!statementSecondTruthProduct) {
-              this.addPremiseToPostProcessing(premise);
-            }
-            break;
-          default:
-            this.addInvalidPremiseError(premise, 'False premise: Invalid premise type.');
-            break;
-        }
-        premiseIndexesToRemove.push(premiseIndex);
-        return null;
+        this.processThisProposition(premise, premiseIndex);
+        // // const processed = this.processProposition(premise);
+        // if (processed) {
+        //   premiseIndexesToRemove.push(premiseIndex);
+        // }
+        // const premiseFirstIsTruthStatement = premiseFirst instanceof TruthStatement;
+        // const premiseSecondIsTruthStatement = premiseSecond instanceof TruthStatement;
+        //     const statementFirstTruthProduct: boolean = truthStatementFirst.truthValue
+        //       ? this.isInTrueStatements(truthStatementFirst.statement)
+        //       : this.isInFalseStatements(truthStatementFirst.statement);
+        //     const statementSecondTruthProduct: boolean = truthStatementSecond.truthValue
+        //       ? this.isInTrueStatements(truthStatementSecond.statement)
+        //       : this.isInFalseStatements(truthStatementSecond.statement);
+        // switch (premise.type.id) {
+        //   case PropositionTypes.IfThen.id:
+        //     const processed = this.processIfThen(premise);
+        //         switch (truthStatementFirst.truthValue) {
+        //           case true:
+        //             // IF x
+        //             if (this.isInTrueStatements(truthStatementFirst.statement)) {
+        //               if (truthStatementSecond.truthValue) {
+        //                 // THEN y
+        //                 this.trueStatements.push(truthStatementSecond.statement);
+        //                 break;
+        //               }
+        //               // THEN !y
+        //               this.falseStatements.push(truthStatementSecond.statement);
+        //               break;
+        //             } else if (
+        //               truthStatementSecond.truthValue &&
+        //               this.isInFalseStatements(truthStatementSecond.statement)
+        //             ) {
+        //               // modus tollens
+        //               // x -> y ^ !y = !x
+        //               this.falseStatements.push(truthStatementFirst.statement);
+        //               this.addPremiseNote(
+        //                 premise,
+        //                 `Modus Tollens: ${truthStatementFirst.statement.id} -> ${truthStatementSecond.statement.id} ^ ! ${truthStatementSecond.statement.id} = ! ${truthStatementFirst.id}`,
+        //               );
+        //               break;
+        //             } else if (
+        //               !truthStatementSecond.truthValue &&
+        //               this.isInTrueStatements(truthStatementSecond.statement)
+        //             ) {
+        //               // modus tollens
+        //               // x -> !y ^ y = !x
+        //               this.falseStatements.push(truthStatementFirst.statement);
+        //               this.addPremiseNote(
+        //                 premise,
+        //                 `Modus Tollens: ${truthStatementFirst.statement.id} -> ! ${truthStatementSecond.statement.id} ^ ${truthStatementSecond.statement.id} = ! ${truthStatementFirst.id}`,
+        //               );
+        //               break;
+        //             }
+        //             break;
+        //           case false:
+        //             // IF !x
+        //             if (this.isInFalseStatements(truthStatementFirst.statement)) {
+        //               if (truthStatementSecond.truthValue) {
+        //                 // THEN y
+        //                 this.trueStatements.push(truthStatementSecond.statement);
+        //                 break;
+        //               }
+        //               // THEN !y
+        //               this.falseStatements.push(truthStatementSecond.statement);
+        //               break;
+        //             } else if (
+        //               tak;
+        //   default:
+        //     this.addInvalidPremiseError(premise, 'False premise: Invalid premise type.');
+        //     return true;
+        // }ruthStatementSecond.truthValue &&
+        //               this.isInFalseStatements(truthStatementSecond.statement)
+        //             ) {
+        //               // modus tollens
+        //               // !x -> y ^ !y = x
+        //               this.trueStatements.push(truthStatementFirst.statement);
+        //               this.addPremiseNote(
+        //                 premise,
+        //                 `Modus Tollens: ! ${truthStatementFirst.statement.id} -> ${truthStatementSecond.statement.id} ^ ! ${truthStatementSecond.statement.id} = ${truthStatementFirst.id}`,
+        //               );
+        //               break;
+        //             } else if (
+        //               !truthStatementSecond.truthValue &&
+        //               this.isInTrueStatements(truthStatementSecond.statement)
+        //             ) {
+        //               // modus tollens
+        //               // !x -> !y ^ y = x
+        //               this.trueStatements.push(truthStatementFirst.statement);
+        //               this.addPremiseNote(
+        //                 premise,
+        //                 `Modus Tollens: ! ${truthStatementFirst.statement.id} -> ! ${truthStatementSecond.statement.id} ^ ${truthStatementSecond.statement.id} = ${truthStatementFirst.id}`,
+        //               );
+        //               break;
+        //             }
+        //             break;
+        //           default:
+        //             break;
+        //         }
+        //         break;
+        //       // x OR y
+        //       case PropositionTypes.Or.id:
+        //         // if !x and !y create error
+        //         if (!statementFirstTruthProduct && !statementSecondTruthProduct) {
+        //           this.addPremiseToPostProcessing(premise);
+        //         }
+        //         break;
+        //       // x NOR y
+        //       case PropositionTypes.Nor.id:
+        //         // both should be false, if either x or y are true then create error
+        //         if (statementFirstTruthProduct) {
+        //           this.addPremiseToPostProcessing(premise);
+        //         }
+        //         if (statementSecondTruthProduct) {
+        //           this.addPremiseToPostProcessing(premise);
+        //         }
+        //         break;
+        //       // x XOR y
+        //       case PropositionTypes.Xor.id:
+        //         // either x is true or y is true, not both true, not both false
+        //         if (statementFirstTruthProduct && statementSecondTruthProduct) {
+        //           this.addPremiseToPostProcessing(premise);
+        //         }
+        //         if (!statementFirstTruthProduct && !statementSecondTruthProduct) {
+        //           this.addPremiseToPostProcessing(premise);
+        //         }
+        //         break;
+        //       // x XNOR y
+        //       case PropositionTypes.Xnor.id:
+        //         // both true, both false = ok
+        //         if (
+        //           (statementFirstTruthProduct && !statementSecondTruthProduct) ||
+        //           (!statementFirstTruthProduct && statementSecondTruthProduct)
+        //         ) {
+        //           this.addPremiseToPostProcessing(premise);
+        //         }
+        //         break;
+        //       case PropositionTypes.Nand.id:
+        //         // anything but both being true = ok
+        //         if (statementFirstTruthProduct && statementSecondTruthProduct) {
+        //           this.addPremiseToPostProcessing(premise);
+        //         }
+        //         break;
+        //       case PropositionTypes.And.id:
+        //         // must both be true
+        //         if (!statementFirstTruthProduct) {
+        //           this.addPremiseToPostProcessing(premise);
+        //         }
+        //         if (!statementSecondTruthProduct) {
+        //           this.addPremiseToPostProcessing(premise);
+        //         }
+        //     break;
+        //   default:
+        //     this.addInvalidPremiseError(premise, 'False premise: Invalid premise type.');
+        //     return true;
+        // }
       }
     });
-    this.removePremiseFromProcessing(premiseIndexesToRemove);
+    this.removePremisesFromProcessing(premiseIndexesToRemove);
   }
 
   private async postProcessPropositions(): Promise<void> {
-    this.premisesToPostProcess.forEach((premise) => {
-      if (premise instanceof Proposition) {
-        const [truthStatementFirst, truthStatementSecond] = premise.truthStatements;
-        const statementFirstTruthProduct: boolean = truthStatementFirst.truthValue
-          ? this.isInTrueStatements(truthStatementFirst.statement)
-          : this.isInFalseStatements(truthStatementFirst.statement);
-        const statementSecondTruthProduct: boolean = truthStatementSecond.truthValue
-          ? this.isInTrueStatements(truthStatementSecond.statement)
-          : this.isInFalseStatements(truthStatementSecond.statement);
-        // product is set when the statement is either in true or false statements
-        // product is not set when statement is in neither
-        const statementFirstTruthProductIsSet =
-          this.isInTrueStatements(truthStatementFirst.statement) ||
-          this.isInFalseStatements(truthStatementFirst.statement);
-        const statementSecondTruthProductIsSet =
-          this.isInTrueStatements(truthStatementSecond.statement) ||
-          this.isInFalseStatements(truthStatementSecond.statement);
-
-        switch (premise.type.id) {
-          // x OR y
-          case PropositionTypes.Or.id:
-            if (!statementFirstTruthProductIsSet || !statementSecondTruthProductIsSet) {
-              this.addPremiseNote(
-                premise,
-                'One or more statements did not have a truth product set',
-              );
-              break;
-            }
-            // if !x and !y create error
-            if (!statementFirstTruthProduct && !statementSecondTruthProduct) {
-              this.addInvalidPremiseError(
-                premise,
-                `False premise: products both statements ${truthStatementFirst.statement.id} and ${truthStatementSecond.statement.id} are false in an OR. At least one product must be true.`,
-              );
-            }
-            break;
-          // x NOR y
-          case PropositionTypes.Nor.id:
-            // both should be false, if either x or y are true then create error
-            if (statementFirstTruthProduct) {
-              this.addInvalidPremiseError(
-                premise,
-                `False premise: product of statement ${truthStatementFirst.statement.id} is true in a NOR. Both should have false products.`,
-              );
-            }
-            if (statementSecondTruthProduct) {
-              this.addInvalidPremiseError(
-                premise,
-                `False premise: product of statement ${truthStatementSecond.statement.id} is true in a NOR. Both should have false products.`,
-              );
-            }
-            break;
-          // x XOR y
-          case PropositionTypes.Xor.id:
-            // either x is true or y is true, not both true, not both false
-            if (statementFirstTruthProduct && statementSecondTruthProduct) {
-              this.addInvalidPremiseError(
-                premise,
-                `False premise: both statements ${truthStatementFirst.id} and ${truthStatementSecond.id} are true in XOR. One and only one product must be true.`,
-              );
-            }
-            if (!statementFirstTruthProduct && !statementSecondTruthProduct) {
-              this.addInvalidPremiseError(
-                premise,
-                `False premise: both statements ${truthStatementFirst.id} and ${truthStatementSecond.id} are false in XOR. One and only one product must be true.`,
-              );
-            }
-            break;
-          // x XNOR y
-          case PropositionTypes.Xnor.id:
-            // both true, both false = ok
-            if (
-              (statementFirstTruthProduct && !statementSecondTruthProduct) ||
-              (!statementFirstTruthProduct && statementSecondTruthProduct)
-            ) {
-              this.addInvalidPremiseError(
-                premise,
-                `False premise: either ${truthStatementFirst.id} is true and ${truthStatementSecond.id} is false, or vice versa, in XNOR. They must be either both true or both false.`,
-              );
-            }
-            break;
-          case PropositionTypes.Nand.id:
-            // anything but both being true = ok
-            if (statementFirstTruthProduct && statementSecondTruthProduct) {
-              this.addInvalidPremiseError(
-                premise,
-                `False premise: both statements ${truthStatementFirst.id} and ${truthStatementSecond.id} are true in NAND. They cannot both be true.`,
-              );
-            }
-            break;
-          case PropositionTypes.And.id:
-            // must both be true
-            if (!statementFirstTruthProduct) {
-              this.addInvalidPremiseError(
-                premise,
-                `False premise: product of statement ${truthStatementFirst.statement.id} is false in a AND. Both should have true products.`,
-              );
-            }
-            if (!statementSecondTruthProduct) {
-              this.addInvalidPremiseError(
-                premise,
-                `False premise: product of statement ${truthStatementSecond.statement.id} is false in a AND. Both should have true products.`,
-              );
-            }
-            break;
-          default:
-            this.addInvalidPremiseError(premise, 'False premise: Invalid premise type.');
-            break;
-        }
-        return null;
-      }
-      return null;
-    });
+    console.log(this.argument);
+    // this.premisesToPostProcess.forEach((premise) => {
+    //   if (premise instanceof Proposition) {
+    //     const [truthStatementFirst, truthStatementSecond] = premise.truthStatements;
+    //     const statementFirstTruthProduct: boolean = truthStatementFirst.truthValue
+    //       ? this.isInTrueStatements(truthStatementFirst.statement)
+    //       : this.isInFalseStatements(truthStatementFirst.statement);
+    //     const statementSecondTruthProduct: boolean = truthStatementSecond.truthValue
+    //       ? this.isInTrueStatements(truthStatementSecond.statement)
+    //       : this.isInFalseStatements(truthStatementSecond.statement);
+    //     // product is set when the statement is either in true or false statements
+    //     // product is not set when statement is in neither
+    //     const statementFirstTruthProductIsSet =
+    //       this.isInTrueStatements(truthStatementFirst.statement) ||
+    //       this.isInFalseStatements(truthStatementFirst.statement);
+    //     const statementSecondTruthProductIsSet =
+    //       this.isInTrueStatements(truthStatementSecond.statement) ||
+    //       this.isInFalseStatements(truthStatementSecond.statement);
+    //     switch (premise.type.id) {
+    //       // x OR y
+    //       case PropositionTypes.Or.id:
+    //         if (!statementFirstTruthProductIsSet || !statementSecondTruthProductIsSet) {
+    //           this.addPremiseNote(
+    //             premise,
+    //             'One or more statements did not have a truth product set',
+    //           );
+    //           break;
+    //         }
+    //         // if !x and !y create error
+    //         if (!statementFirstTruthProduct && !statementSecondTruthProduct) {
+    //           this.addInvalidPremiseError(
+    //             premise,
+    //             `False premise: products both statements ${truthStatementFirst.statement.id} and ${truthStatementSecond.statement.id} are false in an OR. At least one product must be true.`,
+    //           );
+    //         }
+    //         break;
+    //       // x NOR y
+    //       case PropositionTypes.Nor.id:
+    //         // both should be false, if either x or y are true then create error
+    //         if (statementFirstTruthProduct) {
+    //           this.addInvalidPremiseError(
+    //             premise,
+    //             `False premise: product of statement ${truthStatementFirst.statement.id} is true in a NOR. Both should have false products.`,
+    //           );
+    //         }
+    //         if (statementSecondTruthProduct) {
+    //           this.addInvalidPremiseError(
+    //             premise,
+    //             `False premise: product of statement ${truthStatementSecond.statement.id} is true in a NOR. Both should have false products.`,
+    //           );
+    //         }
+    //         break;
+    //       // x XOR y
+    //       case PropositionTypes.Xor.id:
+    //         // either x is true or y is true, not both true, not both false
+    //         if (statementFirstTruthProduct && statementSecondTruthProduct) {
+    //           this.addInvalidPremiseError(
+    //             premise,
+    //             `False premise: both statements ${truthStatementFirst.id} and ${truthStatementSecond.id} are true in XOR. One and only one product must be true.`,
+    //           );
+    //         }
+    //         if (!statementFirstTruthProduct && !statementSecondTruthProduct) {
+    //           this.addInvalidPremiseError(
+    //             premise,
+    //             `False premise: both statements ${truthStatementFirst.id} and ${truthStatementSecond.id} are false in XOR. One and only one product must be true.`,
+    //           );
+    //         }
+    //         break;
+    //       // x XNOR y
+    //       case PropositionTypes.Xnor.id:
+    //         // both true, both false = ok
+    //         if (
+    //           (statementFirstTruthProduct && !statementSecondTruthProduct) ||
+    //           (!statementFirstTruthProduct && statementSecondTruthProduct)
+    //         ) {
+    //           this.addInvalidPremiseError(
+    //             premise,
+    //             `False premise: either ${truthStatementFirst.id} is true and ${truthStatementSecond.id} is false, or vice versa, in XNOR. They must be either both true or both false.`,
+    //           );
+    //         }
+    //         break;
+    //       case PropositionTypes.Nand.id:
+    //         // anything but both being true = ok
+    //         if (statementFirstTruthProduct && statementSecondTruthProduct) {
+    //           this.addInvalidPremiseError(
+    //             premise,
+    //             `False premise: both statements ${truthStatementFirst.id} and ${truthStatementSecond.id} are true in NAND. They cannot both be true.`,
+    //           );
+    //         }
+    //         break;
+    //       case PropositionTypes.And.id:
+    //         // must both be true
+    //         if (!statementFirstTruthProduct) {
+    //           this.addInvalidPremiseError(
+    //             premise,
+    //             `False premise: product of statement ${truthStatementFirst.statement.id} is false in a AND. Both should have true products.`,
+    //           );
+    //         }
+    //         if (!statementSecondTruthProduct) {
+    //           this.addInvalidPremiseError(
+    //             premise,
+    //             `False premise: product of statement ${truthStatementSecond.statement.id} is false in a AND. Both should have true products.`,
+    //           );
+    //         }
+    //         break;
+    //       default:
+    //         this.addInvalidPremiseError(premise, 'False premise: Invalid premise type.');
+    //         break;
+    //     }
+    //     return null;
+    //   }
+    //   return null;
+    // });
   }
 
   // (p -> q) ^ (q -> r) = (p -> r)
@@ -483,99 +886,100 @@ export default class ArgumentCalculator {
     statementSecondId: number,
     statementSecondTruthValue: boolean,
   ): boolean {
-    const ifThenPropositions: Proposition[] = this.getPropositionsByPropositionTypeId(
-      PropositionTypes.IfThen.id,
-    );
-    let index = 0;
-    let trailingTargetTruthStatements: TruthStatement[] = [];
-    const getStatementText = (truthStatementTruthValue: boolean, statementId: number) =>
-      // eslint-disable-next-line implicit-arrow-linebreak
-      `${truthStatementTruthValue ? '' : '!'}${statementId}`;
-    const statementFirstText = getStatementText(statementFirstTruthValue, statementFirstId);
-    const statementSecondText = getStatementText(statementSecondTruthValue, statementSecondId);
+    // const ifThenPropositions: Proposition[] = this.getPropositionsByPropositionTypeId(
+    //   PropositionTypes.IfThen.id,
+    // );
+    // let index = 0;
+    // let trailingTargetTruthStatements: TruthStatement[] = [];
+    // const getStatementText = (truthStatementTruthValue: boolean, statementId: number) =>
+    //   // eslint-disable-next-line implicit-arrow-linebreak
+    //   `${truthStatementTruthValue ? '' : '!'}${statementId}`;
+    // const statementFirstText = getStatementText(statementFirstTruthValue, statementFirstId);
+    // const statementSecondText = getStatementText(statementSecondTruthValue, statementSecondId);
 
-    console.log(
-      `FIND HYPOTHETICAL SYLLOGISM: IF ${statementFirstText} THEN ${statementSecondText}`,
-    );
+    // console.log(
+    //   `FIND HYPOTHETICAL SYLLOGISM: IF ${statementFirstText} THEN ${statementSecondText}`,
+    // );
 
-    while (index < ifThenPropositions.length) {
-      console.log('NEW ROUND');
-      const ifThen = ifThenPropositions[index];
-      const ifThenTSFirst = ifThen.truthStatements[0];
-      const ifThenTSFirstText = getStatementText(
-        ifThenTSFirst.truthValue,
-        ifThenTSFirst.statement.id,
-      );
-      const ifThenTSSecond = ifThen.truthStatements[1];
-      const ifThenTSSecondText = getStatementText(
-        ifThenTSSecond.truthValue,
-        ifThenTSSecond.statement.id,
-      );
+    // while (index < ifThenPropositions.length) {
+    //   console.log('NEW ROUND');
+    //   const ifThen = ifThenPropositions[index];
+    //   const ifThenTSFirst = ifThen.truthStatements[0];
+    //   const ifThenTSFirstText = getStatementText(
+    //     ifThenTSFirst.truthValue,
+    //     ifThenTSFirst.statement.id,
+    //   );
+    //   const ifThenTSSecond = ifThen.truthStatements[1];
+    //   const ifThenTSSecondText = getStatementText(
+    //     ifThenTSSecond.truthValue,
+    //     ifThenTSSecond.statement.id,
+    //   );
 
-      console.log(`INDEX ${index} - analyzing IF ${ifThenTSFirstText} THEN ${ifThenTSSecondText}`);
-      if (
-        ifThenTSSecond.statement.id === statementSecondId &&
-        ifThenTSSecond.truthValue === statementSecondTruthValue
-      ) {
-        console.log(
-          `FOUND: THEN statement ${ifThenTSSecondText} = conlusion THEN ${statementSecondText}`,
-        );
-        trailingTargetTruthStatements.push(ifThenTSFirst);
-        console.log(
-          `ADD ${ifThenTSFirstText} to trailing target statements`,
-          trailingTargetTruthStatements,
-        );
-        ifThenPropositions.splice(index, 1);
-        console.log('REMOVE processed if-then from array', ifThenPropositions);
-        index = 0;
-        console.log(`SET index to ${index}`);
-      } else if (
-        trailingTargetTruthStatements.find(
-          (truthStatements) =>
-            // eslint-disable-next-line implicit-arrow-linebreak
-            truthStatements.statement.id === ifThenTSSecond.statement.id &&
-            truthStatements.truthValue === ifThenTSSecond.truthValue,
-        )
-      ) {
-        console.log(
-          `FOUND: THEN ${ifThenTSSecondText} IN trailing target statements`,
-          trailingTargetTruthStatements,
-        );
-        if (
-          ifThenTSFirst.statement.id === statementFirstId &&
-          ifThenTSFirst.truthValue === statementFirstTruthValue
-        ) {
-          console.log(
-            `FOUND: IF ${ifThenTSFirstText} = conclusion IF ${statementFirstText}`,
-            'RETURN TRUE',
-          );
-          return true;
-        }
-        const newTrailingTargetArray: TruthStatement[] = trailingTargetTruthStatements.map(
-          (truthStatement) => {
-            if (truthStatement.id === ifThenTSSecond.statement.id) {
-              console.log(
-                `REPLACE ${getStatementText(
-                  truthStatement.truthValue,
-                  truthStatement.statement.id,
-                )} in trailing target statements WITH ${ifThenTSFirstText}`,
-              );
-              return ifThenTSFirst;
-            }
-            return truthStatement;
-          },
-        );
-        console.log('new trailing target statements', newTrailingTargetArray);
-        trailingTargetTruthStatements = newTrailingTargetArray;
-        ifThenPropositions.splice(index, 1);
-        console.log('REMOVE processed if-then from array', ifThenPropositions);
-        index = 0;
-        console.log(`SET index to ${index}`);
-      } else {
-        index += 1;
-        console.log(`ADD index + 1 = ${index}`);
-      }
-    }
+    //   console.log(`INDEX ${index} - analyzing IF ${ifThenTSFirstText} THEN ${ifThenTSSecondText}`);
+    //   if (
+    //     ifThenTSSecond.statement.id === statementSecondId &&
+    //     ifThenTSSecond.truthValue === statementSecondTruthValue
+    //   ) {
+    //     console.log(
+    //       `FOUND: THEN statement ${ifThenTSSecondText} = conlusion THEN ${statementSecondText}`,
+    //     );
+    //     trailingTargetTruthStatements.push(ifThenTSFirst);
+    //     console.log(
+    //       `ADD ${ifThenTSFirstText} to trailing target statements`,
+    //       trailingTargetTruthStatements,
+    //     );
+    //     ifThenPropositions.splice(index, 1);
+    //     console.log('REMOVE processed if-then from array', ifThenPropositions);
+    //     index = 0;
+    //     console.log(`SET index to ${index}`);
+    //   } else if (
+    //     trailingTargetTruthStatements.find(
+    //       (truthStatements) =>
+    //         // eslint-disable-next-line implicit-arrow-linebreak
+    //         truthStatements.statement.id === ifThenTSSecond.statement.id &&
+    //         truthStatements.truthValue === ifThenTSSecond.truthValue,
+    //     )
+    //   ) {
+    //     console.log(
+    //       `FOUND: THEN ${ifThenTSSecondText} IN trailing target statements`,
+    //       trailingTargetTruthStatements,
+    //     );
+    //     if (
+    //       ifThenTSFirst.statement.id === statementFirstId &&
+    //       ifThenTSFirst.truthValue === statementFirstTruthValue
+    //     ) {
+    //       console.log(
+    //         `FOUND: IF ${ifThenTSFirstText} = conclusion IF ${statementFirstText}`,
+    //         'RETURN TRUE',
+    //       );
+    //       return true;
+    //     }
+    //     const newTrailingTargetArray: TruthStatement[] = trailingTargetTruthStatements.map(
+    //       (truthStatement) => {
+    //         if (truthStatement.id === ifThenTSSecond.statement.id) {
+    //           console.log(
+    //             `REPLACE ${getStatementText(
+    //               truthStatement.truthValue,
+    //               truthStatement.statement.id,
+    //             )} in trailing target statements WITH ${ifThenTSFirstText}`,
+    //           );
+    //           return ifThenTSFirst;
+    //         }
+    //         return truthStatement;
+    //       },
+    //     );
+    //     console.log('new trailing target statements', newTrailingTargetArray);
+    //     trailingTargetTruthStatements = newTrailingTargetArray;
+    //     ifThenPropositions.splice(index, 1);
+    //     console.log('REMOVE processed if-then from array', ifThenPropositions);
+    //     index = 0;
+    //     console.log(`SET index to ${index}`);
+    //   } else {
+    //     index += 1;
+    //     console.log(`ADD index + 1 = ${index}`);
+    //   }
+    // }
+    console.log(this.argument);
     return false;
   }
 
@@ -586,72 +990,73 @@ export default class ArgumentCalculator {
     statementSecondId: number,
     statementSecondTruthValue: boolean,
   ): boolean {
-    if (statementFirstTruthValue !== statementSecondTruthValue) {
-      return false;
-    }
-    // 1. find (p -> q) and (r -> s) to fit conclusion (q V s)
-    const ifThenPremises = this.getPropositionsByPropositionTypeId(PropositionTypes.IfThen.id);
-    const validIfThenFirsts = ifThenPremises.filter(
-      (premise: Proposition) =>
-        // eslint-disable-next-line implicit-arrow-linebreak
-        premise.truthStatements[1].statement.id === statementFirstId &&
-        premise.truthStatements[1].truthValue === statementFirstTruthValue,
-    );
-    const validIfThenSeconds = ifThenPremises.filter(
-      (premise: Proposition) =>
-        // eslint-disable-next-line implicit-arrow-linebreak
-        premise.truthStatements[1].statement.id === statementSecondId &&
-        premise.truthStatements[1].truthValue === statementSecondTruthValue,
-    );
+    // if (statementFirstTruthValue !== statementSecondTruthValue) {
+    //   return false;
+    // }
+    // // 1. find (p -> q) and (r -> s) to fit conclusion (q V s)
+    // const ifThenPremises = this.getPropositionsByPropositionTypeId(PropositionTypes.IfThen.id);
+    // const validIfThenFirsts = ifThenPremises.filter(
+    //   (premise: Proposition) =>
+    //     // eslint-disable-next-line implicit-arrow-linebreak
+    //     premise.truthStatements[1].statement.id === statementFirstId &&
+    //     premise.truthStatements[1].truthValue === statementFirstTruthValue,
+    // );
+    // const validIfThenSeconds = ifThenPremises.filter(
+    //   (premise: Proposition) =>
+    //     // eslint-disable-next-line implicit-arrow-linebreak
+    //     premise.truthStatements[1].statement.id === statementSecondId &&
+    //     premise.truthStatements[1].truthValue === statementSecondTruthValue,
+    // );
 
-    if (validIfThenFirsts.length === 0 || validIfThenSeconds.length === 0) {
-      return false;
-    }
+    // if (validIfThenFirsts.length === 0 || validIfThenSeconds.length === 0) {
+    //   return false;
+    // }
 
-    // 2. assuming conclusion is (q V s), find a possible (p V r) to fit (p -> q) ^ (r -> s)
-    const orPremises = this.getPropositionsByPropositionTypeId(PropositionTypes.Or.id);
-    const validOrPremise = orPremises.find((or: Proposition) => {
-      // find (p -> q) for an or where (p V r)
-      const found = validIfThenFirsts.find((first: Proposition) => {
-        if (
-          first.truthStatements[0].statement.id === or.truthStatements[0].statement.id &&
-          first.truthStatements[0].truthValue === or.truthStatements[0].truthValue
-        ) {
-          // found p for (p V ?)
-          const foundR = validIfThenSeconds.find(
-            (second: Proposition) =>
-              // eslint-disable-next-line implicit-arrow-linebreak
-              second.truthStatements[0].statement.id === or.truthStatements[1].statement.id &&
-              second.truthStatements[0].truthValue === or.truthStatements[1].truthValue,
-          );
-          if (foundR) {
-            return true;
-          }
-        } else if (
-          first.truthStatements[0].statement.id === or.truthStatements[1].statement.id &&
-          first.truthStatements[0].truthValue === or.truthStatements[1].truthValue
-        ) {
-          // found r for (? V R)
-          const foundP = validIfThenSeconds.find(
-            (second: Proposition) =>
-              // eslint-disable-next-line implicit-arrow-linebreak
-              second.truthStatements[0].statement.id === or.truthStatements[0].statement.id &&
-              second.truthStatements[0].truthValue === or.truthStatements[0].truthValue,
-          );
-          if (foundP) {
-            return false;
-          }
-        }
-        return false;
-      });
-      if (found) {
-        return true;
-      }
-      return false;
-    });
-    if (validOrPremise) {
-      return true;
-    }
+    // // 2. assuming conclusion is (q V s), find a possible (p V r) to fit (p -> q) ^ (r -> s)
+    // const orPremises = this.getPropositionsByPropositionTypeId(PropositionTypes.Or.id);
+    // const validOrPremise = orPremises.find((or: Proposition) => {
+    //   // find (p -> q) for an or where (p V r)
+    //   const found = validIfThenFirsts.find((first: Proposition) => {
+    //     if (
+    //       first.truthStatements[0].statement.id === or.truthStatements[0].statement.id &&
+    //       first.truthStatements[0].truthValue === or.truthStatements[0].truthValue
+    //     ) {
+    //       // found p for (p V ?)
+    //       const foundR = validIfThenSeconds.find(
+    //         (second: Proposition) =>
+    //           // eslint-disable-next-line implicit-arrow-linebreak
+    //           second.truthStatements[0].statement.id === or.truthStatements[1].statement.id &&
+    //           second.truthStatements[0].truthValue === or.truthStatements[1].truthValue,
+    //       );
+    //       if (foundR) {
+    //         return true;
+    //       }
+    //     } else if (
+    //       first.truthStatements[0].statement.id === or.truthStatements[1].statement.id &&
+    //       first.truthStatements[0].truthValue === or.truthStatements[1].truthValue
+    //     ) {
+    //       // found r for (? V R)
+    //       const foundP = validIfThenSeconds.find(
+    //         (second: Proposition) =>
+    //           // eslint-disable-next-line implicit-arrow-linebreak
+    //           second.truthStatements[0].statement.id === or.truthStatements[0].statement.id &&
+    //           second.truthStatements[0].truthValue === or.truthStatements[0].truthValue,
+    //       );
+    //       if (foundP) {
+    //         return false;
+    //       }
+    //     }
+    //     return false;
+    //   });
+    //   if (found) {
+    //     return true;
+    //   }
+    //   return false;
+    // });
+    // if (validOrPremise) {
+    //   return true;
+    // }
+    console.log(this.argument);
     return false;
   }
 
@@ -662,72 +1067,73 @@ export default class ArgumentCalculator {
     statementSecondId: number,
     statementSecondTruthValue: boolean,
   ): boolean {
-    if (statementFirstTruthValue !== statementSecondTruthValue) {
-      return false;
-    }
-    // 1. find (p -> q) and (r -> s) to fit conclusion (!p V !r)
-    const ifThenPremises = this.getPropositionsByPropositionTypeId(PropositionTypes.IfThen.id);
-    const validIfThenFirsts = ifThenPremises.filter(
-      (premise: Proposition) =>
-        // eslint-disable-next-line implicit-arrow-linebreak
-        premise.truthStatements[0].statement.id === statementFirstId &&
-        premise.truthStatements[0].truthValue === !statementFirstTruthValue,
-    );
-    const validIfThenSeconds = ifThenPremises.filter(
-      (premise: Proposition) =>
-        // eslint-disable-next-line implicit-arrow-linebreak
-        premise.truthStatements[0].statement.id === statementSecondId &&
-        premise.truthStatements[0].truthValue === !statementSecondTruthValue,
-    );
+    // if (statementFirstTruthValue !== statementSecondTruthValue) {
+    //   return false;
+    // }
+    // // 1. find (p -> q) and (r -> s) to fit conclusion (!p V !r)
+    // const ifThenPremises = this.getPropositionsByPropositionTypeId(PropositionTypes.IfThen.id);
+    // const validIfThenFirsts = ifThenPremises.filter(
+    //   (premise: Proposition) =>
+    //     // eslint-disable-next-line implicit-arrow-linebreak
+    //     premise.truthStatements[0].statement.id === statementFirstId &&
+    //     premise.truthStatements[0].truthValue === !statementFirstTruthValue,
+    // );
+    // const validIfThenSeconds = ifThenPremises.filter(
+    //   (premise: Proposition) =>
+    //     // eslint-disable-next-line implicit-arrow-linebreak
+    //     premise.truthStatements[0].statement.id === statementSecondId &&
+    //     premise.truthStatements[0].truthValue === !statementSecondTruthValue,
+    // );
 
-    if (validIfThenFirsts.length === 0 || validIfThenSeconds.length === 0) {
-      return false;
-    }
+    // if (validIfThenFirsts.length === 0 || validIfThenSeconds.length === 0) {
+    //   return false;
+    // }
 
-    // 2. assuming conclusion is (!p V !r), find a possible (!q V !s) to fit (p -> q) ^ (r -> s)
-    const orPremises = this.getPropositionsByPropositionTypeId(PropositionTypes.Or.id);
-    const validOrPremise = orPremises.find((or: Proposition) => {
-      // find (p -> q) for an or where (!q V !s)
-      const found = validIfThenFirsts.find((first: Proposition) => {
-        if (
-          first.truthStatements[1].statement.id === or.truthStatements[0].statement.id &&
-          first.truthStatements[1].truthValue === !or.truthStatements[0].truthValue
-        ) {
-          // found !q for (!q V ?)
-          const foundNotS = validIfThenSeconds.find(
-            (second: Proposition) =>
-              // eslint-disable-next-line implicit-arrow-linebreak
-              second.truthStatements[1].statement.id === or.truthStatements[1].statement.id &&
-              second.truthStatements[1].truthValue === !or.truthStatements[1].truthValue,
-          );
-          if (foundNotS) {
-            return true;
-          }
-        } else if (
-          first.truthStatements[1].statement.id === or.truthStatements[1].statement.id &&
-          first.truthStatements[1].truthValue === !or.truthStatements[1].truthValue
-        ) {
-          // found !s for (? V !s)
-          const foundNotQ = validIfThenSeconds.find(
-            (second: Proposition) =>
-              // eslint-disable-next-line implicit-arrow-linebreak
-              second.truthStatements[1].statement.id === or.truthStatements[0].statement.id &&
-              second.truthStatements[1].truthValue === !or.truthStatements[0].truthValue,
-          );
-          if (foundNotQ) {
-            return true;
-          }
-        }
-        return false;
-      });
-      if (found) {
-        return true;
-      }
-      return false;
-    });
-    if (validOrPremise) {
-      return true;
-    }
+    // // 2. assuming conclusion is (!p V !r), find a possible (!q V !s) to fit (p -> q) ^ (r -> s)
+    // const orPremises = this.getPropositionsByPropositionTypeId(PropositionTypes.Or.id);
+    // const validOrPremise = orPremises.find((or: Proposition) => {
+    //   // find (p -> q) for an or where (!q V !s)
+    //   const found = validIfThenFirsts.find((first: Proposition) => {
+    //     if (
+    //       first.truthStatements[1].statement.id === or.truthStatements[0].statement.id &&
+    //       first.truthStatements[1].truthValue === !or.truthStatements[0].truthValue
+    //     ) {
+    //       // found !q for (!q V ?)
+    //       const foundNotS = validIfThenSeconds.find(
+    //         (second: Proposition) =>
+    //           // eslint-disable-next-line implicit-arrow-linebreak
+    //           second.truthStatements[1].statement.id === or.truthStatements[1].statement.id &&
+    //           second.truthStatements[1].truthValue === !or.truthStatements[1].truthValue,
+    //       );
+    //       if (foundNotS) {
+    //         return true;
+    //       }
+    //     } else if (
+    //       first.truthStatements[1].statement.id === or.truthStatements[1].statement.id &&
+    //       first.truthStatements[1].truthValue === !or.truthStatements[1].truthValue
+    //     ) {
+    //       // found !s for (? V !s)
+    //       const foundNotQ = validIfThenSeconds.find(
+    //         (second: Proposition) =>
+    //           // eslint-disable-next-line implicit-arrow-linebreak
+    //           second.truthStatements[1].statement.id === or.truthStatements[0].statement.id &&
+    //           second.truthStatements[1].truthValue === !or.truthStatements[0].truthValue,
+    //       );
+    //       if (foundNotQ) {
+    //         return true;
+    //       }
+    //     }
+    //     return false;
+    //   });
+    //   if (found) {
+    //     return true;
+    //   }
+    //   return false;
+    // });
+    // if (validOrPremise) {
+    //   return true;
+    // }
+    console.log(this.argument);
     return false;
   }
 
@@ -738,112 +1144,114 @@ export default class ArgumentCalculator {
     statementSecondId: number,
     statementSecondTruthValue: boolean,
   ): boolean {
-    if (statementFirstTruthValue === statementSecondTruthValue) {
-      return false;
-    }
+    // if (statementFirstTruthValue === statementSecondTruthValue) {
+    //   return false;
+    // }
 
-    // 1. find (p -> q) and (r -> s) to fit conclusion (q V !r)
-    const ifThenPremises = this.getPropositionsByPropositionTypeId(PropositionTypes.IfThen.id);
-    const validIfThenFirsts = ifThenPremises.filter(
-      (premise: Proposition) =>
-        // eslint-disable-next-line implicit-arrow-linebreak
-        premise.truthStatements[1].statement.id === statementFirstId &&
-        premise.truthStatements[1].truthValue === statementFirstTruthValue,
-    );
-    const validIfThenSeconds = ifThenPremises.filter(
-      (premise: Proposition) =>
-        // eslint-disable-next-line implicit-arrow-linebreak
-        premise.truthStatements[0].statement.id === statementSecondId &&
-        premise.truthStatements[0].truthValue !== statementSecondTruthValue,
-    );
+    // // 1. find (p -> q) and (r -> s) to fit conclusion (q V !r)
+    // const ifThenPremises = this.getPropositionsByPropositionTypeId(PropositionTypes.IfThen.id);
+    // const validIfThenFirsts = ifThenPremises.filter(
+    //   (premise: Proposition) =>
+    //     // eslint-disable-next-line implicit-arrow-linebreak
+    //     premise.truthStatements[1].statement.id === statementFirstId &&
+    //     premise.truthStatements[1].truthValue === statementFirstTruthValue,
+    // );
+    // const validIfThenSeconds = ifThenPremises.filter(
+    //   (premise: Proposition) =>
+    //     // eslint-disable-next-line implicit-arrow-linebreak
+    //     premise.truthStatements[0].statement.id === statementSecondId &&
+    //     premise.truthStatements[0].truthValue !== statementSecondTruthValue,
+    // );
 
-    if (validIfThenFirsts.length === 0 || validIfThenSeconds.length === 0) {
-      return false;
-    }
+    // if (validIfThenFirsts.length === 0 || validIfThenSeconds.length === 0) {
+    //   return false;
+    // }
 
-    // 2. assuming conclusion is (q V !r), find a possible (p V !s) to fit (p -> q) ^ (r -> s)
-    const orPremises = this.getPropositionsByPropositionTypeId(PropositionTypes.Or.id);
-    const validOrPremise = orPremises.find((or: Proposition) => {
-      // find (p -> q) for an or where (p V !s)
-      const found = validIfThenFirsts.find((first: Proposition) => {
-        if (
-          first.truthStatements[0].statement.id === or.truthStatements[0].statement.id &&
-          first.truthStatements[0].truthValue === or.truthStatements[0].truthValue
-        ) {
-          // found p for (p V ?)
-          const foundNotS = validIfThenSeconds.find(
-            (second: Proposition) =>
-              // eslint-disable-next-line implicit-arrow-linebreak
-              second.truthStatements[1].statement.id === or.truthStatements[1].statement.id &&
-              second.truthStatements[1].truthValue !== or.truthStatements[1].truthValue,
-          );
-          if (foundNotS) {
-            return true;
-          }
-        } else if (
-          first.truthStatements[0].statement.id === or.truthStatements[1].statement.id &&
-          first.truthStatements[0].truthValue !== or.truthStatements[1].truthValue
-        ) {
-          // found r for (? V !s)
-          const foundP = validIfThenSeconds.find(
-            (second: Proposition) =>
-              // eslint-disable-next-line implicit-arrow-linebreak
-              second.truthStatements[0].statement.id === or.truthStatements[0].statement.id &&
-              second.truthStatements[0].truthValue === or.truthStatements[0].truthValue,
-          );
-          if (foundP) {
-            return true;
-          }
-        }
-        return false;
-      });
-      if (found) {
-        return true;
-      }
-      return false;
-    });
-    if (validOrPremise) {
-      return true;
-    }
+    // // 2. assuming conclusion is (q V !r), find a possible (p V !s) to fit (p -> q) ^ (r -> s)
+    // const orPremises = this.getPropositionsByPropositionTypeId(PropositionTypes.Or.id);
+    // const validOrPremise = orPremises.find((or: Proposition) => {
+    //   // find (p -> q) for an or where (p V !s)
+    //   const found = validIfThenFirsts.find((first: Proposition) => {
+    //     if (
+    //       first.truthStatements[0].statement.id === or.truthStatements[0].statement.id &&
+    //       first.truthStatements[0].truthValue === or.truthStatements[0].truthValue
+    //     ) {
+    //       // found p for (p V ?)
+    //       const foundNotS = validIfThenSeconds.find(
+    //         (second: Proposition) =>
+    //           // eslint-disable-next-line implicit-arrow-linebreak
+    //           second.truthStatements[1].statement.id === or.truthStatements[1].statement.id &&
+    //           second.truthStatements[1].truthValue !== or.truthStatements[1].truthValue,
+    //       );
+    //       if (foundNotS) {
+    //         return true;
+    //       }
+    //     } else if (
+    //       first.truthStatements[0].statement.id === or.truthStatements[1].statement.id &&
+    //       first.truthStatements[0].truthValue !== or.truthStatements[1].truthValue
+    //     ) {
+    //       // found r for (? V !s)
+    //       const foundP = validIfThenSeconds.find(
+    //         (second: Proposition) =>
+    //           // eslint-disable-next-line implicit-arrow-linebreak
+    //           second.truthStatements[0].statement.id === or.truthStatements[0].statement.id &&
+    //           second.truthStatements[0].truthValue === or.truthStatements[0].truthValue,
+    //       );
+    //       if (foundP) {
+    //         return true;
+    //       }
+    //     }
+    //     return false;
+    //   });
+    //   if (found) {
+    //     return true;
+    //   }
+    //   return false;
+    // });
+    // if (validOrPremise) {
+    //   return true;
+    // }
+    console.log(this.argument);
     return false;
   }
 
   // (p V q) ^ !p = q
   // given statementId should belong to a truthstatement with a true truthValue
   private detectDisjunctiveSyllogism(statementId: number): boolean {
-    const xorPremises = this.getPropositionsByPropositionTypeId(PropositionTypes.Xor.id);
-    const xorPremisesWithConclusion = xorPremises.filter((premise: Proposition) => {
-      if (!premise.truthStatements[0].truthValue || !premise.truthStatements[1].truthValue) {
-        return false;
-      }
-      if (
-        premise.truthStatements[0].statement.id === statementId ||
-        premise.truthStatements[1].statement.id === statementId
-      ) {
-        return true;
-      }
-      return false;
-    });
-    const validXor = xorPremisesWithConclusion.find((premise: Proposition) => {
-      if (
-        premise.truthStatements[0].statement.id === statementId &&
-        this.isInFalseStatements(premise.truthStatements[1].statement)
-      ) {
-        return true;
-      }
-      if (
-        premise.truthStatements[1].statement.id === statementId &&
-        this.isInFalseStatements(premise.truthStatements[0].statement)
-      ) {
-        return true;
-      }
+    // const xorPremises = this.getPropositionsByPropositionTypeId(PropositionTypes.Xor.id);
+    // const xorPremisesWithConclusion = xorPremises.filter((premise: Proposition) => {
+    //   if (!premise.truthStatements[0].truthValue || !premise.truthStatements[1].truthValue) {
+    //     return false;
+    //   }
+    //   if (
+    //     premise.truthStatements[0].statement.id === statementId ||
+    //     premise.truthStatements[1].statement.id === statementId
+    //   ) {
+    //     return true;
+    //   }
+    //   return false;
+    // });
+    // const validXor = xorPremisesWithConclusion.find((premise: Proposition) => {
+    //   if (
+    //     premise.truthStatements[0].statement.id === statementId &&
+    //     this.isInFalseStatements(premise.truthStatements[1].statement)
+    //   ) {
+    //     return true;
+    //   }
+    //   if (
+    //     premise.truthStatements[1].statement.id === statementId &&
+    //     this.isInFalseStatements(premise.truthStatements[0].statement)
+    //   ) {
+    //     return true;
+    //   }
 
-      return false;
-    });
+    //   return false;
+    // });
 
-    if (validXor !== undefined) {
-      return true;
-    }
+    // if (validXor !== undefined) {
+    //   return true;
+    // }
+    console.log(this.argument);
 
     return false;
   }
@@ -864,11 +1272,11 @@ export default class ArgumentCalculator {
       this.addConclusionNote('Disjunctive Syllogism detected');
     } else if (conclusion.truthValue && !this.isInTrueStatements(conclusion.statement)) {
       this.addInvalidConclusionError(
-        "Conclusion's statement was found to false when it was expected to be true.",
+        "Conclusion's statement was found to be false when it was expected to be true.",
       );
     } else if (!conclusion.truthValue && !this.isInFalseStatements(conclusion.statement)) {
       this.addInvalidConclusionError(
-        "Conclusion's statement was found to true when it was expected to be false.",
+        "Conclusion's statement was found to be true when it was expected to be false.",
       );
     }
 
@@ -882,99 +1290,102 @@ export default class ArgumentCalculator {
 
   private async processPropositionConclusion(): Promise<void> {
     // eslint-disable-next-line prefer-destructuring
-    const conclusion: Proposition = this.argument.conclusion;
-    const conclusionTruthStatementFirst = conclusion.truthStatements[0];
-    const conclusionTruthStatementSecond = conclusion.truthStatements[1];
-    const conclusionTruthStatementFirstId = conclusionTruthStatementFirst.statement.id;
-    const conclusionTruthStatementFirstTruthValue = conclusionTruthStatementFirst.truthValue;
-    const conclusionTruthStatementSecondId = conclusionTruthStatementSecond.statement.id;
-    const conclusionTruthStatementSecondTruthValue = conclusionTruthStatementSecond.truthValue;
+    // const conclusion: Proposition = this.argument.conclusion;
+    // const conclusionTruthStatementFirst = conclusion.truthStatements[0];
+    // const conclusionTruthStatementSecond = conclusion.truthStatements[1];
+    // const conclusionTruthStatementFirstId = conclusionTruthStatementFirst.statement.id;
+    // const conclusionTruthStatementFirstTruthValue = conclusionTruthStatementFirst.truthValue;
+    // const conclusionTruthStatementSecondId = conclusionTruthStatementSecond.statement.id;
+    // const conclusionTruthStatementSecondTruthValue = conclusionTruthStatementSecond.truthValue;
 
-    if (
-      this.findPropositionInArgument(
-        conclusion.type.id,
-        conclusionTruthStatementFirstId,
-        conclusionTruthStatementFirstTruthValue,
-        conclusionTruthStatementSecondId,
-        conclusionTruthStatementSecondTruthValue,
-      ) !== undefined
-    ) {
-      this.addConclusionNote('Exact condition found in premises.');
+    // if (
+    //   this.findPropositionInArgument(
+    //     conclusion.type.id,
+    //     conclusionTruthStatementFirstId,
+    //     conclusionTruthStatementFirstTruthValue,
+    //     conclusionTruthStatementSecondId,
+    //     conclusionTruthStatementSecondTruthValue,
+    //   ) !== undefined
+    // ) {
+    //   this.addConclusionNote('Exact condition found in premises.');
 
-      return;
-    }
+    //   return;
+    // }
 
-    switch (conclusion.type.id) {
-      case PropositionTypes.IfThen.id:
-        if (
-          this.detectHypotheticalSyllogism(
-            conclusionTruthStatementFirstId,
-            conclusionTruthStatementFirstTruthValue,
-            conclusionTruthStatementSecondId,
-            conclusionTruthStatementSecondTruthValue,
-          )
-        ) {
-          this.addConclusionNote('Hypothetical Syllogism detected');
-          break;
-        }
-        this.addInvalidConclusionError(
-          'Invalid conclusion: neither exact condition nor hypothetical syllogism found',
-        );
-        break;
-      case PropositionTypes.Or.id:
-        if (
-          this.detectConstructiveDilemma(
-            conclusionTruthStatementFirstId,
-            conclusionTruthStatementFirstTruthValue,
-            conclusionTruthStatementSecondId,
-            conclusionTruthStatementSecondTruthValue,
-          )
-        ) {
-          this.addConclusionNote('Constructive Dilemma detected');
-          break;
-        }
-        if (
-          this.detectDestructiveDilemma(
-            conclusionTruthStatementFirstId,
-            conclusionTruthStatementFirstTruthValue,
-            conclusionTruthStatementSecondId,
-            conclusionTruthStatementSecondTruthValue,
-          )
-        ) {
-          this.addConclusionNote('Destructive Dilemma detected');
-          break;
-        }
-        if (
-          this.detectBidirectionalDilemma(
-            conclusionTruthStatementFirstId,
-            conclusionTruthStatementFirstTruthValue,
-            conclusionTruthStatementSecondId,
-            conclusionTruthStatementSecondTruthValue,
-          )
-        ) {
-          this.addConclusionNote('Bidirectional Dilemma detected');
-          break;
-        }
-        if (
-          (conclusionTruthStatementFirstTruthValue &&
-            this.isInTrueStatements(conclusionTruthStatementFirst.statement)) ||
-          (!conclusionTruthStatementFirstTruthValue &&
-            this.isInFalseStatements(conclusionTruthStatementFirst.statement)) ||
-          (conclusionTruthStatementSecondTruthValue &&
-            this.isInTrueStatements(conclusionTruthStatementSecond.statement)) ||
-          (!conclusionTruthStatementSecondTruthValue &&
-            this.isInFalseStatements(conclusionTruthStatementSecond.statement))
-        ) {
-          this.addConclusionNote('One or more truth statements in OR are true');
-          break;
-        }
-        this.addInvalidConclusionError(
-          'Invalid conclusion: neither exact condition, nor constructive dilemma, nor destructive dilemma, nor bidirectional dilemma found',
-        );
-        break;
-      default:
-        break;
-    }
+    // switch (conclusion.type.id) {
+    //   case PropositionTypes.IfThen.id:
+    //     if (
+    //       this.detectHypotheticalSyllogism(
+    //         conclusionTruthStatementFirstId,
+    //         conclusionTruthStatementFirstTruthValue,
+    //         conclusionTruthStatementSecondId,
+    //         conclusionTruthStatementSecondTruthValue,
+    //       )
+    //     ) {
+    //       this.addConclusionNote('Hypothetical Syllogism detected');
+    //       break;
+    //     }
+    //     this.addInvalidConclusionError(
+    //       'Invalid conclusion: neither exact condition nor hypothetical syllogism found',
+    //     );
+    //     break;
+    //   case PropositionTypes.Or.id:
+    //     if (
+    //       this.detectConstructiveDilemma(
+    //         conclusionTruthStatementFirstId,
+    //         conclusionTruthStatementFirstTruthValue,
+    //         conclusionTruthStatementSecondId,
+    //         conclusionTruthStatementSecondTruthValue,
+    //       )
+    //     ) {
+    //       this.addConclusionNote('Constructive Dilemma detected');
+    //       break;
+    //     }
+    //     if (
+    //       this.detectDestructiveDilemma(
+    //         conclusionTruthStatementFirstId,
+    //         conclusionTruthStatementFirstTruthValue,
+    //         conclusionTruthStatementSecondId,
+    //         conclusionTruthStatementSecondTruthValue,
+    //       )
+    //     ) {
+    //       this.addConclusionNote('Destructive Dilemma detected');
+    //       break;
+    //     }
+    //     if (
+    //       this.detectBidirectionalDilemma(
+    //         conclusionTruthStatementFirstId,
+    //         conclusionTruthStatementFirstTruthValue,
+    //         conclusionTruthStatementSecondId,
+    //         conclusionTruthStatementSecondTruthValue,
+    //       )
+    //     ) {
+    //       this.addConclusionNote('Bidirectional Dilemma detected');
+    //       break;
+    //     }
+    //     if (
+    //       (conclusionTruthStatementFirstTruthValue &&
+    //         this.isInTrueStatements(conclusionTruthStatementFirst.statement)) ||
+    //       (!conclusionTruthStatementFirstTruthValue &&
+    //         this.isInFalseStatements(conclusionTruthStatementFirst.statement)) ||
+    //       (conclusionTruthStatementSecondTruthValue &&
+    //         this.isInTrueStatements(conclusionTruthStatementSecond.statement)) ||
+    //       (!conclusionTruthStatementSecondTruthValue &&
+    //         this.isInFalseStatements(conclusionTruthStatementSecond.statement))
+    //     ) {
+    //       this.addConclusionNote('One or more truth statements in OR are true');
+    //       break;
+    //     }
+    //     this.addInvalidConclusionError(
+    //       'Invalid conclusion:
+    // neither exact condition, nor constructive dilemma, nor destructive dilemma,
+    // nor bidirectional dilemma found',
+    //     );
+    //     break;
+    //   default:
+    //     break;
+    // }
+    console.log(this.argument);
   }
 
   private isConclusionAProposition(): boolean {
