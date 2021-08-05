@@ -1,8 +1,8 @@
 <template>
   <div id="app">
     <div id="nav">
-      <router-link to="/builder">Builder</router-link> |
-      <router-link to="/map">Map</router-link>
+      <router-link to="/builder">Builder</router-link> | <router-link to="/map">Map</router-link> |
+      <router-link to="/universe">Universe</router-link>
     </div>
     <router-view />
   </div>

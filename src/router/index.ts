@@ -2,6 +2,7 @@ import Vue from 'vue';
 import VueRouter, { RouteConfig } from 'vue-router';
 import Builder from '@/views/Builder.vue';
 import Map from '@/views/Map.vue';
+import Universe from '@/views/Universe.vue';
 
 Vue.use(VueRouter);
 
@@ -15,6 +16,11 @@ const routes: Array<RouteConfig> = [
     path: '/map',
     name: 'Map',
     component: Map,
+  },
+  {
+    path: '/universe',
+    name: 'Universe',
+    component: Universe,
   },
 ];
 
