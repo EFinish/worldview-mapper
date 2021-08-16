@@ -3,3 +3,4 @@ allow for accurately calculating all conditional conclusions
 clean up argument-calculator and put functions into subfiles and subclasses
 change FE so that statements have bolder red (or another readable color) text
 allows propositions to act as statements within premises
+upgrade to vue 3
